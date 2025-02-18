@@ -60,14 +60,27 @@
   cursor: pointer;
 }
 
-.middle-panel {
-  flex: 0 0 47%;
-  background-color: #ffffff;
-  padding: 5px;
-  border-right: 1px solid #ccc;
+.mid-panel {
+  width: 53vw;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.mid-panel::-webkit-scrollbar {
+  display: none;
+}
+.divider {
+  width: 1px;
+  background-color: #ddd;
+  height: 100%;
+  margin: 0 1rem;
 }
 
 .right-panel {
-  flex: 0 0 40%;
+  flex: 0 0 44%;
   padding: 5px;
 }

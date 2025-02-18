@@ -1,7 +1,8 @@
 import React from "react";
 import "./Home.css";
 import NavBar from "../NavBar/NavBar.jsx";
-
+import MidPanel from "./MidPanel.jsx";
+import RightPanel from "./RightPanel.jsx";
 const Home = () => {
   const pdfReports = [
     { name: "report1.pdf", path: "/data/reports/report1.pdf" },
@@ -28,13 +29,9 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="middle-panel">
-          <h2>Carbon Report</h2>
-        </div>
-
-        <div className="right-panel">
-          <h2>Chat Box</h2>
-        </div>
+        <MidPanel />
+        <div className="divider"></div>
+        <RightPanel />
       </div>
     </div>
   );

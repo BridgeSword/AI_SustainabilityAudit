@@ -1,6 +1,4 @@
-
-/* Normal Content */
-.jd-page-container {
+.test-jd-page-container {
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -8,14 +6,14 @@
   margin: 2vh 1vw 0 4vw;
 }
 
-.jd-main-content {
+.test-jd-main-content {
   display: flex;
   gap: 20px;
   justify-content: center;
   height: 85vh;
 }
 
-.jd-content {
+.test-jd-content {
   width: 40vw;
   background-color: #f9f9f9;
   padding: 20px;
@@ -26,7 +24,7 @@
   overflow-y: auto;
 }
 
-.field-container {
+.test-field-container {
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 8px;
@@ -37,18 +35,18 @@
   text-align: left;
 }
 
-.field-container:hover {
+.test-field-container:hover {
   background-color: #eefbf9;
   transform: translateY(-3px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.field-container.selected {
+.test-field-container.selected {
   background-color: #eefbf9;
   border-left: 4px solid #128C7E;
 }
 
-.field-label {
+.test-field-label {
   font-size: 1rem;
   font-weight: bold;
   color: #111827;
@@ -59,7 +57,7 @@
   overflow-wrap: break-word;
 }
 
-.field-value {
+.test-field-value {
   font-size: clamp(0.85rem, 1.8vw, 0.85rem);
   line-height: 1.4;
   color: #374151;
@@ -69,7 +67,7 @@
 }
 
 /* Chatbot */
-.chat-box-job {
+.test-chat-box-job {
   width: 40vw;
   background-color: #ffffff;
   padding: 20px;
@@ -82,14 +80,14 @@
   position: relative;
 }
 
-.chat-box-header {
+.test-chat-box-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10px;
 }
 
-.header-left {
+.test-header-left {
   flex: 1;
   text-align: left;
   font-size: 1.5rem;
@@ -98,33 +96,32 @@
   line-height: 1.2;
 }
 
-.header-right {
+.test-header-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
 }
 
-.preview-btn2 {
+.test-preview-btn2 {
   gap: 10px;
   display: flex;
   background: none;
   border: none;
   cursor: pointer;
   align-items: center;
-  
-  
 }
-.preview-btn2 img{
+
+.test-preview-btn2 img {
   height: 1.5rem;
   width: 1.5rem;
 }
 
-.preview-btn2:hover{
+.test-preview-btn2:hover {
   background-color: #f3f3f3;
 }
 
-.generate-job-button {
+.test-generate-job-button {
   padding: 10px 20px;
   background-color: #128c7e;
   color: white;
@@ -135,11 +132,11 @@
   transition: background-color 0.3s ease;
 }
 
-.generate-job-button:hover {
+.test-generate-job-button:hover {
   background-color: #1dad9c;
 }
 
-.chat-history-job {
+.test-chat-history-job {
   flex: 1;
   max-height: 60vh;
   overflow-y: auto;
@@ -153,20 +150,20 @@
   gap: 10px;
 }
 
-.chat-history-job::-webkit-scrollbar {
+.test-chat-history-job::-webkit-scrollbar {
   width: 8px;
 }
 
-.chat-history-job::-webkit-scrollbar-thumb {
+.test-chat-history-job::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
 
-.chat-history-job::-webkit-scrollbar-thumb:hover {
+.test-chat-history-job::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-.chat-message-job {
+.test-chat-message-job {
   margin-bottom: 10px;
   padding: 3px 15px;
   border-radius: 8px;
@@ -189,14 +186,14 @@
   }
 }
 
-.chat-message-job.user {
+.test-chat-message-job.user {
   background-color: #eefbf9;
   align-self: flex-end;
   text-align: right;
   color: #374151;
 }
 
-.chat-message-job.assistant {
+.test-chat-message-job.assistant {
   background-color: #128C7E;
   align-self: flex-start;
   text-align: left;
@@ -237,13 +234,13 @@ form button:hover {
   background-color: #1dad9c;
 }
 
-.generate-job-container {
+.test-generate-job-container {
   display: flex;
   justify-content: center;
   margin-top: 20px;
 }
 
-.generate-job-container button {
+.test-generate-job-container button {
   padding: 10px 20px;
   background-color: #128c7e;
   color: white;
@@ -254,13 +251,13 @@ form button:hover {
   transition: background-color 0.3s ease;
 }
 
-.generate-job-container button:hover {
+.test-generate-job-container button:hover {
   background-color: #1dad9c;
 }
 
 /* ========== Preview Mode ========== */
 
-.preview-mode {
+.test-preview-mode {
   position: fixed;
   top: 0;
   left: 15vw;
@@ -274,48 +271,46 @@ form button:hover {
   animation: zoomIn 0.5s ease-out;
 }
 
-
-.preview-header {
+.test-preview-header {
   padding: 10px;
   border-bottom: 1px solid #ddd;
 }
 
-
-.preview-header-top {
+.test-preview-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.preview-header-top .chat-box-title {
+.test-preview-header-top .test-chat-box-title {
   font-size: 1.5rem;
   font-weight: bold;
   color: #333;
 }
 
-.preview-header-top .preview-btn-container {
+.test-preview-header-top .test-preview-btn-container {
   display: flex;
   align-items: center;
 }
 
-.preview-header-top .preview-btn {
+.test-preview-header-top .test-preview-btn {
   background: none;
   border: none;
   cursor: pointer;
 }
 
-.preview-header-top .preview-btn img {
+.test-preview-header-top .test-preview-btn img {
   width: 2.4rem;
   height: 2.4rem;
 }
 
-.preview-header-bottom {
+.test-preview-header-bottom {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
 }
 
-.preview-header-bottom .generate-job-button {
+.test-preview-header-bottom .test-generate-job-button {
   padding: 10px 20px;
   background-color: #128c7e;
   color: white;
@@ -326,41 +321,39 @@ form button:hover {
   transition: background-color 0.3s ease;
 }
 
-.preview-header-bottom .generate-job-button:hover {
+.test-preview-header-bottom .test-generate-job-button:hover {
   background-color: #1dad9c;
 }
 
-.preview-canvas {
+.test-preview-canvas {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
 }
 
-.preview-section {
+.test-preview-section {
   margin-bottom: 20px;
   padding: 15px;
   background: #fff;
   border-radius: 8px;
-  
 }
 
-.preview-section-title {
+.test-preview-section-title {
   margin: 0 0 8px;
   font-size: 1.3rem;
   font-weight: bold;
   color: #111827;
 }
 
-.preview-section-content {
+.test-preview-section-content {
   margin: 0;
   font-size: 1rem;
   color: #374151;
 }
 
-
-.preview-btn:focus,
-.preview-btn2:focus,
-.generate-job-button:focus,
+.test-preview-btn:focus,
+.test-preview-btn2:focus,
+.test-generate-job-button:focus,
 button:focus {
   outline: none;
 }
