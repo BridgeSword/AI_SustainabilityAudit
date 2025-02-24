@@ -1,5 +1,15 @@
 /* ========== Normal Mode ========== */
 
+.home-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
 .test-jd-page-container {
   display: flex;
   flex-direction: column;
@@ -310,13 +320,12 @@ form button:hover {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
-  gap: 10px; /* Add gap between buttons */
+  gap: 10px;
 }
 
-.test-preview-header-bottom .test-generate-job-button {
+.test-preview-header-bottom .test-generate-job-button,
+.test-preview-header-bottom .test-edit-button {
   padding: 10px 20px;
-  background-color: #128c7e;
-  color: white;
   border: none;
   border-radius: 5px;
   font-size: 16px;
@@ -324,8 +333,22 @@ form button:hover {
   transition: background-color 0.3s ease;
 }
 
+.test-preview-header-bottom .test-generate-job-button {
+  background-color: #128c7e;
+  color: white;
+}
+
+.test-preview-header-bottom .test-edit-button {
+  background-color: #3b82f6;
+  color: white;
+}
+
 .test-preview-header-bottom .test-generate-job-button:hover {
   background-color: #1dad9c;
+}
+
+.test-preview-header-bottom .test-edit-button:hover {
+  background-color: #2563eb;
 }
 
 /* Preview Container */
@@ -379,18 +402,19 @@ form button:hover {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  background-color: white;
 }
 
 .test-preview-container .test-preview-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .test-preview-container .test-preview-section-title {
-  margin: 0;
+  margin: 20px 0 10px;
   font-size: 1.3rem;
   font-weight: bold;
   color: #111827;
@@ -403,31 +427,25 @@ form button:hover {
   line-height: 1.6;
 }
 
-/* Scrollbar Styling */
-.test-preview-container .test-report-outline::-webkit-scrollbar,
-.test-preview-container .test-preview-canvas::-webkit-scrollbar {
-  width: 8px;
+/* Edit Mode in Preview */
+.test-edit-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin: 20px 0;
 }
 
-.test-preview-container .test-report-outline::-webkit-scrollbar-thumb,
-.test-preview-container .test-preview-canvas::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+.test-edit-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 15px;
+  margin: 15px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
 }
 
-.test-preview-container .test-report-outline::-webkit-scrollbar-thumb:hover,
-.test-preview-container .test-preview-canvas::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
 
-/* Animation */
-@keyframes zoomIn {
-  0% {
-    transform: scale(0.7);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
