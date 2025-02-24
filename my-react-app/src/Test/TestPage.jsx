@@ -325,7 +325,24 @@ const TestPage = () => {
           <NavBar />
           <div className="test-jd-page-container">
             <div className="test-jd-main-content">
-              {/* Left: All sections */}
+              {/* Left: Report Outline */}
+              <div className="test-report-outline">
+                <h3>Report Outline</h3>
+                <ul>
+                  {sections.map((section, index) => (
+                    <li
+                      key={index}
+                      className={
+                        selectedSection === index ? "selected-outline" : ""
+                      }
+                      onClick={() => handleSectionClick(index)}
+                    >
+                      {section.title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* Middle: All sections */}
               <div className="test-jd-content">
                 {sections.map((section, index) => (
                   <div
@@ -347,7 +364,7 @@ const TestPage = () => {
                 <div className="test-chat-box-header">
                   <div className="test-header-left">
                     <div className="test-chat-box-title">
-                      Change Report Content
+                      Modify Report
                     </div>
                   </div>
                   <div className="test-header-right">
@@ -361,7 +378,7 @@ const TestPage = () => {
                       className="test-generate-job-button"
                       onClick={handleGenerateJob}
                     >
-                      Generate Report
+                      Save
                     </button>
                   </div>
                 </div>
