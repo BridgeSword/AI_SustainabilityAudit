@@ -1,3 +1,5 @@
+/* ========== Normal Mode ========== */
+
 .test-jd-page-container {
   display: flex;
   flex-direction: column;
@@ -308,6 +310,7 @@ form button:hover {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
+  gap: 10px; /* Add gap between buttons */
 }
 
 .test-preview-header-bottom .test-generate-job-button {
@@ -325,39 +328,99 @@ form button:hover {
   background-color: #1dad9c;
 }
 
-.test-preview-canvas {
+/* Preview Container */
+.test-preview-container {
+  display: flex;
+  height: calc(100vh - 60px); /* Adjust height to account for header */
+}
+
+/* Report Outline */
+.test-preview-container .test-report-outline {
+  width: 250px;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+.test-preview-container .test-report-outline h3 {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.test-preview-container .test-report-outline ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.test-preview-container .test-report-outline li {
+  padding: 10px;
+  cursor: pointer;
+  color: #555;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.test-preview-container .test-report-outline li:hover {
+  background-color: #f1f1f1;
+}
+
+.test-preview-container .test-report-outline .selected-outline {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+/* Preview Canvas */
+.test-preview-container .test-preview-canvas {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
 }
 
-.test-preview-section {
+.test-preview-container .test-preview-section {
   margin-bottom: 20px;
   padding: 15px;
   background: #fff;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.test-preview-section-title {
-  margin: 0 0 8px;
+.test-preview-container .test-preview-section-title {
+  margin: 0;
   font-size: 1.3rem;
   font-weight: bold;
   color: #111827;
 }
 
-.test-preview-section-content {
+.test-preview-container .test-preview-section-content {
   margin: 0;
   font-size: 1rem;
   color: #374151;
+  line-height: 1.6;
 }
 
-.test-preview-btn:focus,
-.test-preview-btn2:focus,
-.test-generate-job-button:focus,
-button:focus {
-  outline: none;
+/* Scrollbar Styling */
+.test-preview-container .test-report-outline::-webkit-scrollbar,
+.test-preview-container .test-preview-canvas::-webkit-scrollbar {
+  width: 8px;
 }
 
+.test-preview-container .test-report-outline::-webkit-scrollbar-thumb,
+.test-preview-container .test-preview-canvas::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.test-preview-container .test-report-outline::-webkit-scrollbar-thumb:hover,
+.test-preview-container .test-preview-canvas::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animation */
 @keyframes zoomIn {
   0% {
     transform: scale(0.7);

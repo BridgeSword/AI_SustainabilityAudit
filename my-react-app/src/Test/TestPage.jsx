@@ -49,6 +49,7 @@ const TestPage = () => {
     },
   ];
 
+
   const [sections, setSections] = useState(initialSections);
   const [selectedSection, setSelectedSection] = useState(null);
   const [chatInput, setChatInput] = useState("");
@@ -62,6 +63,15 @@ const TestPage = () => {
 
   const [previewMode, setPreviewMode] = useState(true);
   const chatHistoryRef = useRef(null);
+  const sectionRefs = useRef([]);
+
+  // Scroll to the selected section
+  const scrollToSection = (index) => {
+    if (sectionRefs.current[index]) {
+      sectionRefs.current[index].scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
 
   useEffect(() => {
     if (chatHistoryRef.current) {
@@ -71,7 +81,11 @@ const TestPage = () => {
 
   const handleSectionClick = (index) => {
     setSelectedSection(index);
+    if (previewMode) {
+      scrollToSection(index); // Scroll to the section in preview mode
+    }
   };
+
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
@@ -101,9 +115,25 @@ const TestPage = () => {
     setChatInput("");
   };
 
+
   const handleGenerateJob = () => {
     console.log("Generated with data:", sections);
     navigate("/jobs", { state: { sections } });
+  };
+
+  const handleDownload = () => {
+    // Create a downloadable file with the report content
+    const reportContent = sections
+      .map((section) => `### ${section.title}\n\n${section.content}`)
+      .join("\n\n");
+
+    const blob = new Blob([reportContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Carbon_Report.txt";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const enterPreviewMode = () => {
@@ -165,21 +195,49 @@ const TestPage = () => {
             <div className="test-preview-header-bottom">
               <button
                 className="test-generate-job-button"
-                onClick={handleGenerateJob}
+                onClick={handleDownload}
               >
-                Generate Report
+                Download
               </button>
             </div>
           </div>
-          <div className="test-preview-canvas">
-            {sections.map((section, index) => (
-              <div key={index} className="test-preview-section">
-                <h4 className="test-preview-section-title">{section.title}</h4>
-                <p className="test-preview-section-content">
-                  {parseFormattedText(section.content)}
-                </p>
-              </div>
-            ))}
+          <div className="test-preview-container">
+            {/* Left: Report Outline */}
+            <div className="test-report-outline">
+              <h3>Report Outline</h3>
+              <ul>
+                {sections.map((section, index) => (
+                  <li
+                    key={index}
+                    className={
+                      selectedSection === index ? "selected-outline" : ""
+                    }
+                    onClick={() => handleSectionClick(index)}
+                  >
+                    {section.title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Right: Report Content */}
+            <div className="test-preview-canvas">
+              {sections.map((section, index) => (
+                <div key={index} className="test-preview-section">
+                  <div className="test-preview-section-header">
+                    <h4 className="test-preview-section-title">{section.title}</h4>
+                    <button
+                      className="test-edit-button"
+                      onClick={(e) => handleEditClick(index, e)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="test-preview-section-content">
+                    {parseFormattedText(section.content)}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ) : (
