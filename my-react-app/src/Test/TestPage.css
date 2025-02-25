@@ -2,7 +2,7 @@
 
 .home-container {
   position: fixed;
-  top: 0;
+  top: 40px;
   left: 0;
   width: 100%;
   height: 100vh;
@@ -382,6 +382,7 @@ form button:hover {
 .test-preview-header-bottom .test-generate-job-button,
 .test-preview-header-bottom .test-edit-button {
   padding: 10px 20px;
+  margin: 5px;
   border: none;
   border-radius: 5px;
   font-size: 16px;

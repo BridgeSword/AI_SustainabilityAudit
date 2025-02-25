@@ -277,9 +277,15 @@ const TestPage = () => {
                   className="test-edit-button"
                   onClick={handleEditClick}
                 >
-                  Edit Section
+                  Manually Edit
                 </button>
               )}
+              <button
+                className="test-generate-job-button"
+                onClick={exitPreviewMode}
+              >
+                AI-Assisted Edit
+              </button>
               <button
                 className="test-generate-job-button"
                 onClick={handleDownload}

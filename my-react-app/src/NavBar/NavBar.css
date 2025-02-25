@@ -20,16 +20,14 @@
   height: 100%;
   padding: 0px 24px !important;
   margin: 0;
-  clip-path: inset(0 0 30% 0);
 }
 
 .logo-img {
-  width: 100px;
-  height: 100px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
   object-position: center;
   pointer-events: none;
-  clip-path: inset(30% 0 33% 0);
 }
 
 .logo:hover, .logo-img:hover {
