@@ -123,6 +123,7 @@
 
 .test-generate-job-button {
   padding: 10px 20px;
+  margin: 5px;
   background-color: #128c7e;
   color: white;
   border: none;
@@ -259,7 +260,7 @@ form button:hover {
 
 .test-preview-mode {
   position: fixed;
-  top: 0;
+  top: 60px;
   left: 15vw;
   width: 70vw;
   height: 100vh;

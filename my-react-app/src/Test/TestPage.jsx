@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TestPage.css";
+import NavBar from "../NavBar/NavBar.jsx";
 
 const TestPage = () => {
   const navigate = useNavigate();
@@ -151,23 +152,25 @@ const TestPage = () => {
       {previewMode ? (
         // ===== Preview Mode =====
         <div className="test-preview-mode">
+          <NavBar />
           <div className="test-preview-header">
             <div className="test-preview-header-top">
               <div className="test-chat-box-title">
                 Carbon Report (Preview Mode)
               </div>
-              <div className="test-preview-btn-container">
-                <button className="test-preview-btn" onClick={exitPreviewMode}>
-                  <img src="/cross.png" alt="Close" />
-                </button>
-              </div>
             </div>
             <div className="test-preview-header-bottom">
               <button
                 className="test-generate-job-button"
+                onClick={exitPreviewMode}
+              >
+                Edit
+              </button>
+              <button
+                className="test-generate-job-button"
                 onClick={handleGenerateJob}
               >
-                Generate Report
+                Download
               </button>
             </div>
           </div>
@@ -185,6 +188,7 @@ const TestPage = () => {
       ) : (
         // ===== Normal Mode =====
         <div className="test-jd-page-container">
+          <NavBar />
           <div className="test-jd-main-content">
             {/* Left: All sections */}
             <div className="test-jd-content">
