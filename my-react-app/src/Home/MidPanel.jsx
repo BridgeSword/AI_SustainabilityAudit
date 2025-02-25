@@ -71,7 +71,7 @@ const MidPanel = () => {
             onChange={(e) => setReportName(e.target.value)}
             placeholder="Enter report name"
             className="full-width auto-resize"
-            rows="1"
+            rows="2"
             onInput={autoResize}
           ></textarea>
         </div>
@@ -92,7 +92,7 @@ const MidPanel = () => {
         </div>
 
         <div className="form-group">
-          <label>Sample Report Uploading (Optional)</label>
+          <label>Sample Report Upload (Optional)</label>
           {selectedFile ? (
             <div className="uploaded-content">
               <img src="/file.jpg" alt="File Icon" />

@@ -21,7 +21,7 @@ const TestPage = () => {
     {
       title: "Scope 2 Emissions: Indirect Emissions from Purchased Electricity",
       content:
-        "Scope 2 emissions arise from purchased electricity consumed by XYZ Corporation’s operations. The company sourced a total of 210 GWh of electricity in 2023, resulting in an estimated 60,300 metric tons of CO2e. The majority of emissions stem from grid electricity, with regional power mix emissions factors taken into account:\n- **Grid Electricity Consumption:** 55,000 tCO2e (coal-based energy sources dominate in the region)\n- **Renewable Energy Purchases:** 5,300 tCO2e (partial offset through Power Purchase Agreements)\n\nXYZ Corporation aims to transition to 50% renewable energy by 2027 by expanding solar panel installations at its facilities and increasing green power procurement.",
+        "Scope 2 emissions arise from purchased electricity consumed by XYZ Corporation's operations. The company sourced a total of 210 GWh of electricity in 2023, resulting in an estimated 60,300 metric tons of CO2e. The majority of emissions stem from grid electricity, with regional power mix emissions factors taken into account:\n- **Grid Electricity Consumption:** 55,000 tCO2e (coal-based energy sources dominate in the region)\n- **Renewable Energy Purchases:** 5,300 tCO2e (partial offset through Power Purchase Agreements)\n\nXYZ Corporation aims to transition to 50% renewable energy by 2027 by expanding solar panel installations at its facilities and increasing green power procurement.",
     },
     {
       title: "Scope 3 Emissions: Indirect Emissions from Supply Chain & Logistics",
@@ -36,7 +36,7 @@ const TestPage = () => {
     {
       title: "Emissions Forecast for 2025 and 2030",
       content:
-        "Based on XYZ Corporation’s current emissions trajectory and planned reduction initiatives, the estimated emissions forecast is as follows:\n- **2025 Projection:** 110,000 tCO2e (10% reduction from 2023)\n- **2030 Projection:** 85,000 tCO2e (30% reduction from 2020 baseline)\n- **Net Zero Target:** Under evaluation for 2040\n\nKey risk factors include regulatory changes, fluctuations in energy costs, and technological adoption rates. Contingency measures include flexible energy procurement contracts and increased R&D investment in carbon capture technologies.",
+        "Based on XYZ Corporation's current emissions trajectory and planned reduction initiatives, the estimated emissions forecast is as follows:\n- **2025 Projection:** 110,000 tCO2e (10% reduction from 2023)\n- **2030 Projection:** 85,000 tCO2e (30% reduction from 2020 baseline)\n- **Net Zero Target:** Under evaluation for 2040\n\nKey risk factors include regulatory changes, fluctuations in energy costs, and technological adoption rates. Contingency measures include flexible energy procurement contracts and increased R&D investment in carbon capture technologies.",
     },
     {
       title: "Recommendations for Stakeholders",
@@ -46,9 +46,10 @@ const TestPage = () => {
     {
       title: "Conclusion",
       content:
-        "This Carbon Report outlines XYZ Corporation’s current emissions profile, reduction strategies, and future targets. With a strong commitment to sustainability, the company is well-positioned to achieve significant carbon reductions in the coming decade. Ongoing monitoring, stakeholder collaboration, and technological advancements will play crucial roles in reaching the company’s net-zero ambition. The next steps involve refining the emissions reduction roadmap, aligning with evolving regulatory frameworks, and continuously innovating to enhance sustainability performance.",
+        "This Carbon Report outlines XYZ Corporation's current emissions profile, reduction strategies, and future targets. With a strong commitment to sustainability, the company is well-positioned to achieve significant carbon reductions in the coming decade. Ongoing monitoring, stakeholder collaboration, and technological advancements will play crucial roles in reaching the company's net-zero ambition. The next steps involve refining the emissions reduction roadmap, aligning with evolving regulatory frameworks, and continuously innovating to enhance sustainability performance.",
     },
   ];
+
 
   const [sections, setSections] = useState(initialSections);
   const [selectedSection, setSelectedSection] = useState(null);
@@ -62,7 +63,19 @@ const TestPage = () => {
   ]);
 
   const [previewMode, setPreviewMode] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
   const chatHistoryRef = useRef(null);
+  const sectionRefs = useRef([]);
+  const reportRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  // Scroll to the selected section
+  const scrollToSection = (index) => {
+    if (sectionRefs.current[index]) {
+      sectionRefs.current[index].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
     if (chatHistoryRef.current) {
@@ -70,10 +83,89 @@ const TestPage = () => {
     }
   }, [chatHistory]);
 
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+    }
+  }, [isEditing, editContent]);
+
   const handleSectionClick = (index) => {
     setSelectedSection(index);
+    if (previewMode) {
+      scrollToSection(index);
+    }
   };
 
+  const handleEditClick = () => {
+    if (selectedSection === null) {
+      alert("Please select a section to edit.");
+      return;
+    }
+    setIsEditing(true);
+    setEditContent(sections[selectedSection].content);
+  };
+
+  const handleSaveEdit = () => {
+    if (selectedSection === null || !editContent.trim()) {
+      alert("Please input something to modify!");
+      return;
+    }
+    setSections((prevSections) => {
+      const newSections = [...prevSections];
+      newSections[selectedSection] = {
+        ...newSections[selectedSection],
+        content: editContent,
+      };
+      return newSections;
+    });
+    
+    const currentTitle = sections[selectedSection].title;
+    const userMsg = { role: "user", content: editContent };
+    const assistantMsg = {
+      role: "assistant",
+      content: `Updated "${currentTitle}" in preview mode.`,
+    };
+    setChatHistory((prev) => [...prev, userMsg, assistantMsg]);
+    
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleApproveChange = (index) => {
+    const updatedChatHistory = [...chatHistory];
+    const approvedMessage = updatedChatHistory[index];
+  
+    if (!approvedMessage.pendingApproval) return;
+  
+    const sectionIndex = approvedMessage.sectionIndex;
+    const newContent = approvedMessage.content.replace(
+      /^Proposed change for ".*?": /,
+      ""
+    );
+  
+    setSections((prevSections) => {
+      const newSections = [...prevSections];
+      newSections[sectionIndex] = {
+        ...newSections[sectionIndex],
+        content: newContent,
+      };
+      return newSections;
+    });
+  
+    updatedChatHistory[index] = {
+      ...approvedMessage,
+      pendingApproval: false,
+      content: `Approved change for "${sections[sectionIndex].title}": ${newContent}`,
+    };
+  
+    setChatHistory(updatedChatHistory);
+  };
+  
+  
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) {
@@ -84,27 +176,47 @@ const TestPage = () => {
       alert("Please select the field to change！");
       return;
     }
+  
     const currentTitle = sections[selectedSection].title;
-    setSections((prevSections) => {
-      const newSections = [...prevSections];
-      newSections[selectedSection] = {
-        ...newSections[selectedSection],
-        content: chatInput,
-      };
-      return newSections;
-    });
     const userMsg = { role: "user", content: chatInput };
+  
+   
+    const updatedChatHistory = chatHistory.map((chat) => ({
+      ...chat,
+      pendingApproval: false, 
+    }));
+  
     const assistantMsg = {
       role: "assistant",
-      content: `Updated "${currentTitle}" with content: ${chatInput}`,
+      content: `Proposed change for "${currentTitle}": ${chatInput}`,
+      pendingApproval: true, 
+      sectionIndex: selectedSection, 
     };
-    setChatHistory((prev) => [...prev, userMsg, assistantMsg]);
+  
+    setChatHistory([...updatedChatHistory, userMsg, assistantMsg]); 
     setChatInput("");
   };
+  
+  
 
   const handleGenerateJob = () => {
     console.log("Generated with data:", sections);
     navigate("/jobs", { state: { sections } });
+  };
+
+  const handleDownload = () => {
+    // Create a downloadable file with the report content
+    const reportContent = sections
+      .map((section) => `### ${section.title}\n\n${section.content}`)
+      .join("\n\n");
+
+    const blob = new Blob([reportContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Carbon_Report.txt";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const enterPreviewMode = () => {
@@ -160,105 +272,186 @@ const TestPage = () => {
               </div>
             </div>
             <div className="test-preview-header-bottom">
+              {selectedSection !== null && !isEditing && (
+                <button
+                  className="test-edit-button"
+                  onClick={handleEditClick}
+                >
+                  Edit Section
+                </button>
+              )}
               <button
                 className="test-generate-job-button"
-                onClick={exitPreviewMode}
-              >
-                Edit
-              </button>
-              <button
-                className="test-generate-job-button"
-                onClick={handleGenerateJob}
+                onClick={handleDownload}
               >
                 Download
               </button>
             </div>
           </div>
-          <div className="test-preview-canvas">
-            {sections.map((section, index) => (
-              <div key={index} className="test-preview-section">
-                <h4 className="test-preview-section-title">{section.title}</h4>
-                <p className="test-preview-section-content">
-                  {parseFormattedText(section.content)}
-                </p>
-              </div>
-            ))}
+          <div className="test-preview-container">
+            {/* Left: Report Outline */}
+            <div className="test-report-outline">
+              <h3>Report Outline</h3>
+              <ul>
+                {sections.map((section, index) => (
+                  <li
+                    key={index}
+                    className={
+                      selectedSection === index ? "selected-outline" : ""
+                    }
+                    onClick={() => handleSectionClick(index)}
+                  >
+                    {section.title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Right: Report Content */}
+            <div className="test-preview-canvas" ref={reportRef}>
+              {isEditing && selectedSection !== null ? (
+                <div className="test-edit-container">
+                  <h4 className="test-preview-section-title">
+                    {sections[selectedSection].title}
+                  </h4>
+                  <textarea
+                    ref={textareaRef}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="test-edit-textarea"
+                  />
+                  <div className="test-edit-buttons">
+                    <button
+                      className="test-save-button"
+                      onClick={handleSaveEdit}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      className="test-cancel-button"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                sections.map((section, index) => (
+                  <div
+                    key={index}
+                    className="test-preview-section"
+                    ref={(el) => (sectionRefs.current[index] = el)} // Assign ref to each section
+                  >
+                    <h4 className="test-preview-section-title">{section.title}</h4>
+                    <div className="test-preview-section-content">
+                      {parseFormattedText(section.content)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       ) : (
         // ===== Normal Mode =====
-        <div className="test-jd-page-container">
+        <div className="home-container">
           <NavBar />
-          <div className="test-jd-main-content">
-            {/* Left: All sections */}
-            <div className="test-jd-content">
-              {sections.map((section, index) => (
-                <div
-                  key={index}
-                  className={`test-field-container ${
-                    selectedSection === index ? "selected" : ""
-                  }`}
-                  onClick={() => handleSectionClick(index)}
-                >
-                  <h4 className="test-field-label">{section.title}</h4>
-                  <div className="test-field-value">
-                    {parseFormattedText(section.content)}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Right: Chatbot */}
-            <div className="test-chat-box-job">
-              <div className="test-chat-box-header">
-                <div className="test-header-left">
-                  <div className="test-chat-box-title">
-                    Change Report Content
-                  </div>
-                </div>
-                <div className="test-header-right">
-                  <button
-                    className="test-preview-btn2"
-                    onClick={enterPreviewMode}
-                  >
-                    Preview <img src="/zoom-in.png" alt="Zoom In" />
-                  </button>
-                  <button
-                    className="test-generate-job-button"
-                    onClick={handleGenerateJob}
-                  >
-                    Generate Report
-                  </button>
-                </div>
+          <div className="test-jd-page-container">
+            <div className="test-jd-main-content">
+              {/* Left: Report Outline */}
+              <div className="test-report-outline">
+                <h3>Report Outline</h3>
+                <ul>
+                  {sections.map((section, index) => (
+                    <li
+                      key={index}
+                      className={
+                        selectedSection === index ? "selected-outline" : ""
+                      }
+                      onClick={() => handleSectionClick(index)}
+                    >
+                      {section.title}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="test-chat-history-job" ref={chatHistoryRef}>
-                {chatHistory.map((chat, index) => (
+              {/* Middle: All sections */}
+              <div className="test-jd-content">
+                {sections.map((section, index) => (
                   <div
                     key={index}
-                    className={`test-chat-message-job ${chat.role}`}
+                    className={`test-field-container ${
+                      selectedSection === index ? "selected" : ""
+                    }`}
+                    onClick={() => handleSectionClick(index)}
                   >
-                    <p>{chat.content}</p>
+                    <h4 className="test-field-label">{section.title}</h4>
+                    <div className="test-field-value">
+                      {parseFormattedText(section.content)}
+                    </div>
                   </div>
                 ))}
               </div>
-              <form onSubmit={handleChatSubmit}>
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder={
-                    selectedSection !== null
-                      ? `Please input change for "${
-                          sections[selectedSection].title.length > 10
-                            ? sections[selectedSection].title.slice(0, 30)
-                            : sections[selectedSection].title
-                        }" ...`
-                      : "Please first select a section to modify"
-                  }
-                />
-                <button type="submit" disabled={selectedSection === null}>
-                  Submit
-                </button>
-              </form>
+              {/* Right: Chatbot */}
+              <div className="test-chat-box-job">
+                <div className="test-chat-box-header">
+                  <div className="test-header-left">
+                    <div className="test-chat-box-title">
+                      Modify Report
+                    </div>
+                  </div>
+                  <div className="test-header-right">
+                    <button
+                      className="test-preview-btn2"
+                      onClick={enterPreviewMode}
+                    >
+                      Preview <img src="/zoom-in.png" alt="Zoom In" />
+                    </button>
+                    <button
+                      className="test-generate-job-button"
+                      onClick={handleGenerateJob}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+                <div className="test-chat-history-job" ref={chatHistoryRef}>
+                  {chatHistory.map((chat, index) => (
+                    <div key={index} className={`test-chat-message-job ${chat.role}`}>
+                      <p>{chat.content}</p>
+                      {chat.pendingApproval && (
+                        <div className="test-approve-container">
+                          <button
+                            className="test-approve-button"
+                            onClick={() => handleApproveChange(index)}
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <form onSubmit={handleChatSubmit}>
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder={
+                      selectedSection !== null
+                        ? `Please input change for "${
+                            sections[selectedSection].title.length > 10
+                              ? sections[selectedSection].title.slice(0, 30)
+                              : sections[selectedSection].title
+                          }" ...`
+                        : "Please first select a section to modify"
+                    }
+                  />
+                  <button type="submit" disabled={selectedSection === null}>
+                    Submit
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>

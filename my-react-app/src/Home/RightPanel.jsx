@@ -36,16 +36,32 @@ const RightPanel = () => {
     <div className="chat-box-job">
       <div className="chat-history-job2" ref={chatHistoryRef}>
         {chatHistory.map((chat, index) => (
-          <div key={index} className={`chat-message-job ${chat.role}`}>
-            <p>{chat.content}</p>
+          <div key={index} className={`chat-message-wrapper ${chat.role}`}>
+            {chat.role === "assistant" && (
+              <img
+                src="/bot.png"
+                alt="Bot Icon"
+                className="chat-icon"
+              />
+            )}
+            <div className={`chat-message-job ${chat.role === "assistant" && index !== 0 ? "with-approve" : ""}`}>
+              <p>{chat.content}</p>
+              {chat.role === "assistant" && index !== 0 && (
+                <button className="approve-button" onClick={handleApprove}>
+                  Approve
+                </button>
+              )}
+            </div>
+            {chat.role === "user" && (
+              <img
+                src="/user.png"
+                alt="User Icon"
+                className="chat-icon"
+              />
+            )}
           </div>
         ))}
       </div>
-      {chatHistory.length > 1 && (
-        <button className="approve-button" onClick={handleApprove}>
-          Approve
-        </button>
-      )}
       <form onSubmit={handleChatSubmit}>
         <input
           type="text"
