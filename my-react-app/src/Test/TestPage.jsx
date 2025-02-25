@@ -135,6 +135,37 @@ const TestPage = () => {
     setIsEditing(false);
   };
 
+  const handleApproveChange = (index) => {
+    const updatedChatHistory = [...chatHistory];
+    const approvedMessage = updatedChatHistory[index];
+  
+    if (!approvedMessage.pendingApproval) return;
+  
+    const sectionIndex = approvedMessage.sectionIndex;
+    const newContent = approvedMessage.content.replace(
+      /^Proposed change for ".*?": /,
+      ""
+    );
+  
+    setSections((prevSections) => {
+      const newSections = [...prevSections];
+      newSections[sectionIndex] = {
+        ...newSections[sectionIndex],
+        content: newContent,
+      };
+      return newSections;
+    });
+  
+    updatedChatHistory[index] = {
+      ...approvedMessage,
+      pendingApproval: false,
+      content: `Approved change for "${sections[sectionIndex].title}": ${newContent}`,
+    };
+  
+    setChatHistory(updatedChatHistory);
+  };
+  
+  
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) {
@@ -145,23 +176,28 @@ const TestPage = () => {
       alert("Please select the field to change！");
       return;
     }
+  
     const currentTitle = sections[selectedSection].title;
-    setSections((prevSections) => {
-      const newSections = [...prevSections];
-      newSections[selectedSection] = {
-        ...newSections[selectedSection],
-        content: chatInput,
-      };
-      return newSections;
-    });
     const userMsg = { role: "user", content: chatInput };
+  
+   
+    const updatedChatHistory = chatHistory.map((chat) => ({
+      ...chat,
+      pendingApproval: false, 
+    }));
+  
     const assistantMsg = {
       role: "assistant",
-      content: `Updated "${currentTitle}" with content: ${chatInput}`,
+      content: `Proposed change for "${currentTitle}": ${chatInput}`,
+      pendingApproval: true, 
+      sectionIndex: selectedSection, 
     };
-    setChatHistory((prev) => [...prev, userMsg, assistantMsg]);
+  
+    setChatHistory([...updatedChatHistory, userMsg, assistantMsg]); 
     setChatInput("");
   };
+  
+  
 
   const handleGenerateJob = () => {
     console.log("Generated with data:", sections);
@@ -384,14 +420,22 @@ const TestPage = () => {
                 </div>
                 <div className="test-chat-history-job" ref={chatHistoryRef}>
                   {chatHistory.map((chat, index) => (
-                    <div
-                      key={index}
-                      className={`test-chat-message-job ${chat.role}`}
-                    >
+                    <div key={index} className={`test-chat-message-job ${chat.role}`}>
                       <p>{chat.content}</p>
+                      {chat.pendingApproval && (
+                        <div className="test-approve-container">
+                          <button
+                            className="test-approve-button"
+                            onClick={() => handleApproveChange(index)}
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
+
                 <form onSubmit={handleChatSubmit}>
                   <input
                     type="text"

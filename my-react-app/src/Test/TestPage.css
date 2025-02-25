@@ -191,8 +191,9 @@
 
 .test-chat-history-job {
   flex: 1;
-  max-height: 60vh;
-  overflow-y: auto;
+  max-height: 60vh;       
+  overflow-y: auto;    
+  overflow-x: hidden;
   margin-bottom: 20px;
   padding: 10px;
   border-radius: 8px;
@@ -217,17 +218,29 @@
 }
 
 .test-chat-message-job {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  flex-shrink: 0;
+  
   margin-bottom: 10px;
   padding: 3px 15px;
   border-radius: 8px;
   max-width: 80%;
-  word-wrap: break-word;
   font-size: 13px;
   line-height: 1.4;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: visible;
+  overflow-x: hidden;
+
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
   animation: fadeIn 0.3s ease-out;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -240,17 +253,18 @@
 }
 
 .test-chat-message-job.user {
-  background-color: #eefbf9;
+  background-color: #128C7E;
   align-self: flex-end;
   text-align: right;
-  color: #374151;
+  color: white;
 }
 
 .test-chat-message-job.assistant {
-  background-color: #128C7E;
+  
+  background-color: #eefbf9;
   align-self: flex-start;
   text-align: left;
-  color: white;
+  color: #374151;
 }
 
 /* Chat input */
@@ -489,4 +503,23 @@ form button:hover {
   resize: vertical;
 }
 
+.test-approve-container {
+  display: flex;
+  justify-content: flex-end; 
+  width: 100%; 
+  margin-top: 5px; 
+}
 
+.test-approve-button {
+  background-color: #128C7E;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.test-approve-button:hover {
+  background-color: #1dad9c;
+}
