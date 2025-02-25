@@ -3,16 +3,25 @@ Frontend using REACT
 
 TODO:
 
-1. Navbar for home page at top and left
 
-2. The left-side input section on the homepage, should be scrollable
+1. Loading for preview
 
-3. Right part chatbox, Can use current one, but once update need "approve" button
+2. Design TEST API
 
-4. Preview page add "edit" and "download"
+3. UI change for preview page (left align, AI EDIT and EDIT manually), AI Edit Page(DELETE SAVE)
 
-5. Modify page add in-line edit, and modify page need that "approve" for change
+4. Modify some disharmonious colors and hover colors (#128C7E)
 
-6. Functional "Download" function for preview page
+5. Sign in function (?)
 
-7. Loading for preview page after click approve in homepage, maybe need to show the progress of backend process
+TO USE:
+
+1. git clone https://github.coecis.cornell.edu/jy2222/Frontend_CarbonReport.git
+
+2. go to my-creat-app folder, sudo npm install
+
+3. sudo npm run dev
+
+
+
+
