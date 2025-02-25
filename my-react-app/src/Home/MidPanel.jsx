@@ -85,9 +85,10 @@ const MidPanel = () => {
             onChange={(e) => setStandard(e.target.value)}
             className="full-width"
           >
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
+            <option value="option1">SEC</option>
+            <option value="option2">CSRD</option>
+            <option value="option3">TCFD</option>
+            <option value="option3">ISSB</option>
           </select>
         </div>
 
@@ -170,7 +171,7 @@ const MidPanel = () => {
         </div>
 
         <button type="submit" className="save-button full-width">
-          Save
+          Generate
         </button>
       </form>
     </div>
