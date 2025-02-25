@@ -18,9 +18,9 @@ TO USE:
 
 1. git clone https://github.coecis.cornell.edu/jy2222/Frontend_CarbonReport.git
 
-2. go to my-creat-app folder, sudo npm install
+2. go to my-creat-app folder, npm install
 
-3. sudo npm run dev
+3. npm run dev
 
 
 
