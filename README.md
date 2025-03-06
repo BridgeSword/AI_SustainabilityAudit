@@ -1,3 +1,5 @@
+# SD-MARAG (Self Decisive Multi-Agentic Retrieval Augmented Generation)
+
 Frontend using REACT
 
 
