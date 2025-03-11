@@ -2,19 +2,65 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RightPanel.css";
 
-const RightPanel = () => {
+const RightPanel = ({ formData }) => {
   const [chatHistory, setChatHistory] = useState([
-    { role: "assistant", content: 'Please click "Save" in the editor to start editing.' }
+    { role: "assistant", content: "Hello! How can I help you today? Please first fill out the info in the left part!" }
   ]);
   const [chatInput, setChatInput] = useState("");
   const chatHistoryRef = useRef(null);
+  const ws = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!formData) return;
+
+    ws.current = new WebSocket("ws://localhost:8765");
+
+    ws.current.onopen = () => {
+      console.log("WebSocket Connected");
+      ws.current.send(JSON.stringify(formData));
+      setChatHistory((prev) => [
+        ...removeApproves(prev), 
+        { role: "assistant", content: "⏳ Processing...", isThinking: true }
+      ]);
+    };
+
+    ws.current.onmessage = (event) => {
+      const receivedData = JSON.parse(event.data);
+
+      setChatHistory((prev) => {
+        let newHistory = [...removeApproves(prev)]; 
+
+        if (receivedData.status === "processing") {
+          newHistory[newHistory.length - 1] = {
+            ...newHistory[newHistory.length - 1],
+            content: `⏳ ${receivedData.progress}`
+          };
+        } else if (receivedData.status === "completed") {
+          newHistory[newHistory.length - 1] = {
+            role: "assistant",
+            content: "",
+            fullContent: receivedData.result,
+            isThinking: false,
+            showApprove: false
+          };
+          simulateTyping(newHistory.length - 1, receivedData.result);
+        }
+        return newHistory;
+      });
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }, [formData]);
 
   useEffect(() => {
     if (chatHistoryRef.current) {
       chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
     }
   }, [chatHistory]);
+
 
   const parseFormattedText = (text) => {
     return text.split("\n").map((line, index) => {
@@ -47,51 +93,65 @@ const RightPanel = () => {
       );
     });
   };
-  
+
+
+  const removeApproves = (history) => {
+    return history.map((chat) => ({
+      ...chat,
+      showApprove: false
+    }));
+  };
+
+  const simulateTyping = (index, fullText) => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setChatHistory((prev) => {
+        const newHistory = [...prev];
+        newHistory[index] = {
+          ...newHistory[index],
+          content: fullText.substring(0, i)
+        };
+        return newHistory;
+      });
+      i++;
+      if (i > fullText.length) {
+        clearInterval(interval);
+        setChatHistory((prev) => {
+          let updatedHistory = [...prev];
+          updatedHistory[index] = {
+            ...updatedHistory[index],
+            showApprove: true 
+          };
+          return updatedHistory;
+        });
+      }
+    }, 50);
+  };
+
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-    const newUserMessage = { role: "user", content: chatInput.trim() };
-    setChatHistory((prev) => [...prev, newUserMessage]);
+
+    const userMessage = { role: "user", content: chatInput.trim() };
+    setChatHistory((prev) => [...removeApproves(prev), userMessage]); 
     setChatInput("");
-    
-    setTimeout(() => {
-      const machineReply = {
-        role: "assistant",
-        content: `Carbon Emissions Report Plan
-  
-  **Objective:**  
-  This plan outlines the approach for assessing and mitigating XYZ Corporation’s carbon emissions for the fiscal year 2023, covering Scope 1, Scope 2, and Scope 3 emissions.
-  
-  **Key Steps:**
-  
-  1. **Data Collection & Analysis:**  
-     - Gather emission data from direct (Scope 1), indirect energy (Scope 2), and supply chain activities (Scope 3).  
-     - Use the Greenhouse Gas Protocol for standardized reporting.  
-  
-  2. **Emission Breakdown:**  
-     - Identify key emission sources: fuel combustion, electricity consumption, and supplier emissions.  
-     - Quantify total CO2 equivalent (tCO2e) emissions and categorize them accordingly.  
-  
-  3. **Reduction Strategies:**  
-     - **Renewable Energy Transition:** Increase solar and wind energy procurement.  
-     - **Fleet Electrification:** Transition company vehicles to electric models.  
-     - **Operational Efficiency:** Optimize energy use in buildings and manufacturing.  
-     - **Supply Chain Collaboration:** Work with vendors to reduce upstream emissions.  
-     - **Carbon Offsetting:** Invest in reforestation and verified carbon credit programs.  
-  
-  4. **Targets & Monitoring:**  
-     - Set a 30% emission reduction goal by 2030.  
-     - Regularly track progress and refine strategies based on industry best practices.  
-  
-  **Expected Outcome:**  
-  By implementing this plan, XYZ Corporation will enhance sustainability, reduce its carbon footprint, and align with global environmental goals while ensuring compliance with regulatory requirements.`
-      };
-      setChatHistory((prev) => [...prev, machineReply]);
-    }, 1000);
+
+    ws.current.send(JSON.stringify({ message: chatInput.trim() }));
+
+    setChatHistory((prev) => [
+      ...prev,
+      { role: "assistant", content: "⏳ Processing...", isThinking: true }
+    ]);
   };
 
   const handleApprove = () => {
+    console.log("Approved");
+
+    if (ws.current) {
+      ws.current.close();
+      console.log("WebSocket Closed");
+    }
+
     navigate("/test");
   };
 
@@ -101,26 +161,18 @@ const RightPanel = () => {
         {chatHistory.map((chat, index) => (
           <div key={index} className={`chat-message-wrapper ${chat.role}`}>
             {chat.role === "assistant" && (
-              <img
-                src="/bot.png"
-                alt="Bot Icon"
-                className="chat-icon"
-              />
+              <img src="/bot.png" alt="Bot Icon" className="chat-icon" />
             )}
             <div className={`chat-message-job ${chat.role === "assistant" && index !== 0 ? "with-approve" : ""}`}>
-              <p>{parseFormattedText(chat.content)}</p>
-              {chat.role === "assistant" && index !== 0 && (
+              <div>{parseFormattedText(chat.content)}</div>
+              {chat.role === "assistant" && chat.showApprove && (
                 <button className="approve-button" onClick={handleApprove}>
                   Approve
                 </button>
               )}
             </div>
             {chat.role === "user" && (
-              <img
-                src="/user.png"
-                alt="User Icon"
-                className="chat-icon"
-              />
+              <img src="/user.png" alt="User Icon" className="chat-icon" />
             )}
           </div>
         ))}

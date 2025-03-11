@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./MidPanel.css";
 
-const MidPanel = () => {
+const MidPanel = ({ onGenerate }) => {
   const [reportName, setReportName] = useState("");
   const [standard, setStandard] = useState("option1");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -11,9 +11,7 @@ const MidPanel = () => {
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
+    if (file) setSelectedFile(file);
   };
 
   const handleDragOver = (e) => {
@@ -35,17 +33,18 @@ const MidPanel = () => {
     setSelectedFile(null);
   };
 
-
-  const handleSave = (e) => {
+  const handleGenerate = (e) => {
     e.preventDefault();
-    console.log({
+    
+    const formData = {
       reportName,
       standard,
-      selectedFile,
       carboGoal,
       carbonPlan,
       carbonAction,
-    });
+    };
+
+    onGenerate(formData);
   };
 
   const autoResize = (e) => {
@@ -55,14 +54,12 @@ const MidPanel = () => {
 
   return (
     <div className="mid-panel">
- 
       <div className="mid-panel-header">
         <h2>Carbon Report</h2>
         <hr className="header-hr" />
       </div>
 
-      <form className="mid-panel-form" onSubmit={handleSave}>
-        {/* Report Name */}
+      <form className="mid-panel-form" onSubmit={handleGenerate}>
         <div className="form-group">
           <label htmlFor="reportName">Report Name</label>
           <textarea
@@ -76,7 +73,6 @@ const MidPanel = () => {
           ></textarea>
         </div>
 
-        {/* Standard */}
         <div className="form-group">
           <label htmlFor="standard">Carbon Standard</label>
           <select
@@ -128,7 +124,6 @@ const MidPanel = () => {
           )}
         </div>
 
-        {/* Carbo Goal */}
         <div className="form-group">
           <label htmlFor="carboGoal">Carbon Goal</label>
           <textarea
@@ -142,7 +137,6 @@ const MidPanel = () => {
           ></textarea>
         </div>
 
-        {/* Carbon Plan */}
         <div className="form-group">
           <label htmlFor="carbonPlan">Carbon Plan</label>
           <textarea
@@ -156,7 +150,6 @@ const MidPanel = () => {
           ></textarea>
         </div>
 
-        {/* Carbon Action */}
         <div className="form-group">
           <label htmlFor="carbonAction">Carbon Action</label>
           <textarea
