@@ -21,9 +21,12 @@ def call_genaiapi(SYSTEM_PROMPT: str,
     if genai_model.startswith("openai"):
         logger.info("Calling OpenAI API")
 
+        genai_model = "-".join(genai_model.split("-")[1:])
+
         messages = [
             {"role": "developer", "content": SYSTEM_PROMPT}
         ]
+        
         messages.extend(CHATS)
 
         response = ai_client.chat.completions.create(

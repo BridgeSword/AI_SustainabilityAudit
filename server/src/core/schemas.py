@@ -18,16 +18,32 @@ class CarbonReportPlanRequest(BaseModel):
     def ensure_device(cls, device: Optional[str]) -> str:
         return device or "cpu"
     
+
 @dataclass
-class CRPlan:
+class CRPlanRequest:
     standard: str = field(default_factory=str)
     goal: str = field(default_factory=str)
     plan: str = field(default_factory=str)
     action: str = field(default_factory=str)
     company: str = field(default_factory=str)
-    genai_model: str = field(default_factory=str)
-    device: str = field(default_factory=str)
+    genai_model: str = field(default="openai-gpt-4o")
+    device: str = field(default="cpu")
     
+
+@dataclass
+class CRPlanResponse:
+    task_status: str = field(default_factory=str)
+    error: str = field(default=None)
+    response: str = field(default=None)
+
+    def json(self):
+        return {
+            "task_status": self.task_status,
+            "error": self.error,
+            "response": self.response
+        }
+
+
 class CarbonReportPlanResponse(BaseModel):
     task_status: str = Field(default=None)
     task_id: str = Field(default=None)
