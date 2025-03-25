@@ -92,9 +92,7 @@ const TestPage = () => {
 
   const handleSectionClick = (index) => {
     setSelectedSection(index);
-    if (previewMode) {
-      scrollToSection(index);
-    }
+    scrollToSection(index);
   };
 
   const handleEditClick = () => {
@@ -389,6 +387,7 @@ const TestPage = () => {
                       selectedSection === index ? "selected" : ""
                     }`}
                     onClick={() => handleSectionClick(index)}
+                    ref={(el) => (sectionRefs.current[index] = el)}
                   >
                     <h4 className="test-field-label">{section.title}</h4>
                     <div className="test-field-value">
