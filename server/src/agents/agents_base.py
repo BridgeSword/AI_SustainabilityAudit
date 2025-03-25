@@ -4,17 +4,21 @@ from typing import Any
 from openai import OpenAI
 
 from ..services.genai_apis import call_genaiapi, call_hf_model
-from ..core.utils import get_logger
+from ..core.utils import get_logger, extract_json
 
 
 logger = get_logger(__name__)
 
 class AgentBase:
-    def __init__(self, genai_model: str, temperature: float, device: str=None):
+    def __init__(self, 
+                 genai_model: str, 
+                 temperature: float, 
+                 device: str=None, 
+                 system_message: str=None):
         self.genai_model = genai_model
         
         self.history: list = []
-        self.system_message: str = None
+        self.system_message: str = system_message
 
         self.tools = []
 
@@ -32,6 +36,7 @@ class AgentBase:
         self.api_key = None
 
         if self.genai_model.startswith("openai"):
+            self.base_url = "https://api.openai.com/v1/"
             self.api_key = os.getenv("OPENAI_API_KEY")
 
         elif self.genai_model.startswith("gemini"):
@@ -56,12 +61,20 @@ class AgentBase:
         self.system_message = sys_msg
     
 
-    def __call__(self, message):
+    def __call__(self, message, json_out=False):
         self.history.append({"role": "user", "content": message})
+
         result = self.execute()
+
         self.history.append({"role": "assistant", "content": result})
-        
+
+        if json_out:
+            result = list(extract_json(result))
         return result
+    
+    
+    def clear_history(self):
+        self.history = []
 
 
     def execute(self):
