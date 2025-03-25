@@ -4,15 +4,25 @@ import "./MidPanel.css";
 const MidPanel = () => {
   const [reportName, setReportName] = useState("");
   const [standard, setStandard] = useState("option1");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [carboGoal, setCarboGoal] = useState("");
   const [carbonPlan, setCarbonPlan] = useState("");
   const [carbonAction, setCarbonAction] = useState("");
 
+  const validatePdfFile = (file) => {
+    return file.type === "application/pdf";
+  };
+
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
+    const files = Array.from(e.target.files);
+    
+    // Filter for only PDF files
+    const pdfFiles = files.filter(file => validatePdfFile(file));
+    
+    if (pdfFiles.length > 0) {
+      setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
+    } else if (files.length > 0) {
+      alert("Only PDF files are allowed.");
     }
   };
 
@@ -24,24 +34,29 @@ const MidPanel = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      setSelectedFile(file);
+    
+    const files = Array.from(e.dataTransfer.files);
+    
+    // Filter for only PDF files
+    const pdfFiles = files.filter(file => validatePdfFile(file));
+    
+    if (pdfFiles.length > 0) {
+      setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
+    } else if (files.length > 0) {
+      alert("Only PDF files are allowed.");
     }
   };
 
-  const handleDeleteFile = (e) => {
-    e.preventDefault();
-    setSelectedFile(null);
+  const handleDeleteFile = (index) => {
+    setSelectedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
-
 
   const handleSave = (e) => {
     e.preventDefault();
     console.log({
       reportName,
       standard,
-      selectedFile,
+      selectedFiles,
       carboGoal,
       carbonPlan,
       carbonAction,
@@ -93,38 +108,44 @@ const MidPanel = () => {
         </div>
 
         <div className="form-group">
-          <label>Sample Report Upload (Optional)</label>
-          {selectedFile ? (
-            <div className="uploaded-content">
-              <img src="/file.jpg" alt="File Icon" />
-              <p className="candidate-upload-title">File uploaded: </p>
-              <div className="file-details">
-                <p className="file-name">{selectedFile.name}</p>
-                <button
-                  className="delete-button-upload"
-                  onClick={handleDeleteFile}
-                >
-                  X
-                </button>
-              </div>
+          <label>Sample Reports Upload (PDF Only)</label>
+          <label
+            htmlFor="fileUpload"
+            className="upload-box"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <span className="upload-instruction">
+              Click or drag to upload PDF files
+            </span>
+            <input
+              type="file"
+              id="fileUpload"
+              onChange={handleFileUpload}
+              className="file-input"
+              accept=".pdf"
+              multiple
+            />
+          </label>
+          
+          {selectedFiles.length > 0 && (
+            <div className="files-list">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <img src="/file.jpg" alt="PDF Icon" className="file-icon" />
+                    <p className="file-name">{file.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="delete-button-upload"
+                    onClick={() => handleDeleteFile(index)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <label
-              htmlFor="fileUpload"
-              className="upload-box"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              <span className="upload-instruction">
-                Click or drag to upload file
-              </span>
-              <input
-                type="file"
-                id="fileUpload"
-                onChange={handleFileUpload}
-                className="file-input"
-              />
-            </label>
           )}
         </div>
 
