@@ -97,7 +97,7 @@ const TestPage = () => {
 
   const handleEditClick = () => {
     if (selectedSection === null) {
-      alert("Please select a section to edit.");
+      alert("Please select a section on Report Outline to edit.");
       return;
     }
     setIsEditing(true);
@@ -270,7 +270,7 @@ const TestPage = () => {
               </div>
             </div>
             <div className="test-preview-header-bottom">
-              {selectedSection !== null && !isEditing && (
+              {!isEditing && (
                 <button
                   className="test-edit-button"
                   onClick={handleEditClick}
