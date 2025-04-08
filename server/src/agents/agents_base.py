@@ -61,8 +61,12 @@ class AgentBase:
         self.system_message = sys_msg
     
 
-    def __call__(self, message, json_out=False):
-        self.history.append({"role": "user", "content": message})
+    def __call__(self, messages, json_out=False, store_history=True):
+        if isinstance(messages, list):
+            for message in messages:
+                self.history.append({"role": "user", "content": message})
+        else:
+            self.history.append({"role": "user", "content": messages})
 
         result = self.execute()
 
@@ -70,6 +74,10 @@ class AgentBase:
 
         if json_out:
             result = list(extract_json(result))
+
+        if not store_history:
+            self.clear_history()
+            
         return result
     
     

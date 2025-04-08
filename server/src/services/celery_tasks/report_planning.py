@@ -1,25 +1,20 @@
-import time
 import json
-import asyncio
-
-from fastapi import WebSocket
-from fastapi.responses import JSONResponse
+from typing import Dict, Union
 
 from ...main import celery_app, milvus_client
 from ...core.utils import get_logger
-from ...core.schemas import CRPlanRequest, CRPlanResponse
-from ...ws.manager import WSConnectionManager
+from ...core.schemas import CRPlanRequest
 from ...agents import Tool, AgentBase
 from ...agents.prompts import *
 
 
 logger = get_logger(__name__)
 
-ws_manager = WSConnectionManager()
-
 @celery_app.task(ignore_result=False, track_started=True)
-def start_thresholding(cr_plan: CRPlanRequest, user_instructions:str):
+def start_thresholding(cr_plan: CRPlanRequest, user_instructions: str) -> Union[None, int]:
     logger.info("------------Executing Thresholder Agent------------")
+
+    logger.info("Started deciding the threshold no. of loops required to complete the planning!")
 
     thresholder_agent = AgentBase(genai_model=cr_plan.genai_model, 
                                   temperature=0.7, 
@@ -44,9 +39,8 @@ def start_thresholding(cr_plan: CRPlanRequest, user_instructions:str):
     return req_threshold
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_planning(cr_plan: CRPlanRequest, user_instructions:str, req_threshold: int):
-    
-    logger.info("Starting deciding the threshold no. of loops required to complete the planning!")
+def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold: int) -> Union[None, Dict]:
+    logger.info("------------Executing Planner Process------------")
 
     planner_agent = AgentBase(genai_model=cr_plan.genai_model, 
                               temperature=0.7, 
@@ -65,13 +59,15 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions:str, req_threshold:
     for _ in range(2):
         try:
             for _ in range(req_threshold):
+                logger.info("------------Generating Plan------------")
                 generated_plan = planner_agent(plan_instruction, json_out=True)[0]
 
                 generated_plan_str = json.dumps(generated_plan, indent=4)
 
                 critique = evaluation_agent(AGENT_PLAN_PROMPT.format(plan=generated_plan_str), json_out=True)[0]
 
-                if critique["modification"]:
+                if critique.get("modification", None) is not None:
+                    logger.info("------------Modifying Plan based on the critique------------")
                     plan_instruction = PLAN_MODIFICATION_CRITIQUE.format(critique=critique["critique"])
                     continue
                 else:
