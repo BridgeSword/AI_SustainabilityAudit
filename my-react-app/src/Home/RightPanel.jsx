@@ -10,6 +10,7 @@ const RightPanel = ({ formData }) => {
   const chatHistoryRef = useRef(null);
   const ws = useRef(null);
   const navigate = useNavigate();
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (!formData) return;
@@ -21,17 +22,21 @@ const RightPanel = ({ formData }) => {
       ws.current.send(JSON.stringify(formData));
       setChatHistory((prev) => [
         ...removeApproves(prev), 
-        { role: "assistant", content: "⏳ Processing...", isThinking: true }
+        { role: "assistant", content: "Thinking...", isThinking: true }
       ]);
     };
 
     ws.current.onmessage = (event) => {
       const receivedData = JSON.parse(event.data);
-
       setChatHistory((prev) => {
-        let newHistory = [...removeApproves(prev)]; 
+        let newHistory = [...removeApproves(prev)];
 
-        if (receivedData.status === "processing") {
+        if (receivedData.status === "thinking") {
+          newHistory[newHistory.length - 1] = {
+            ...newHistory[newHistory.length - 1],
+            content: `🤔 ${receivedData.progress}` 
+          };
+        } else if (receivedData.status === "processing") {
           newHistory[newHistory.length - 1] = {
             ...newHistory[newHistory.length - 1],
             content: `⏳ ${receivedData.progress}`
@@ -51,9 +56,10 @@ const RightPanel = ({ formData }) => {
     };
 
     return () => {
-      ws.current.close();
+      if (ws.current) ws.current.close();
     };
   }, [formData]);
+  
 
   useEffect(() => {
     if (chatHistoryRef.current) {
@@ -94,7 +100,27 @@ const RightPanel = ({ formData }) => {
     });
   };
 
-
+  const autoResizeChat = (e) => {
+    const el = e.target;
+    el.style.height = "auto";
+    const style = window.getComputedStyle(el);
+    let lineHeight = style.lineHeight;
+    console.log(lineHeight)
+    console.log(el.scrollHeight)
+    if (lineHeight === "normal") {
+      lineHeight = 54;
+    } else {
+      lineHeight = parseFloat(lineHeight);
+    }
+    if (el.scrollHeight > lineHeight + 4) {
+      el.style.height = "8vh";
+    } else {
+      el.style.height = "5vh";
+    }
+  };
+  
+  
+  
   const removeApproves = (history) => {
     return history.map((chat) => ({
       ...chat,
@@ -137,6 +163,10 @@ const RightPanel = ({ formData }) => {
     setChatInput("");
 
     ws.current.send(JSON.stringify({ message: chatInput.trim() }));
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "5vh";
+    }
 
     setChatHistory((prev) => [
       ...prev,
@@ -178,12 +208,13 @@ const RightPanel = ({ formData }) => {
         ))}
       </div>
       <form onSubmit={handleChatSubmit}>
-        <input
-          type="text"
+        <textarea
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
+          onInput={autoResizeChat}
           placeholder="Enter your changes here..."
-        />
+          className="chat-input"
+        ></textarea>
         <button type="submit">Submit</button>
       </form>
     </div>

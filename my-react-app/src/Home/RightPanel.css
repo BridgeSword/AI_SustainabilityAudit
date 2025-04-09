@@ -12,7 +12,6 @@
   display: flex;
   gap: 20px;
   justify-content: center;
-  height: 90vh;
 }
 
 .jd-content {
@@ -22,7 +21,6 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-size: clamp(0.8rem, 1.7vw, 0.8rem);
-  height: 85vh;
   overflow-y: auto;
 }
 
@@ -33,7 +31,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 90vh;
   position: relative;
   border: none;
   box-shadow: none;
@@ -46,7 +43,7 @@ form {
 
 .chat-history-job2 {
   flex: 1;
-  height: 90vh;
+  height: 85vh;
   overflow-y: auto;
   margin-bottom: 20px;
   padding: 10px;
@@ -98,7 +95,7 @@ form {
 
 
 .chat-message-job.with-approve {
-  padding-bottom: 50px;
+  padding-bottom: 30px;
 }
 
 .chat-message-wrapper.user .chat-message-job {
@@ -228,4 +225,13 @@ button:focus {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.chat-input {
+  width: 100%;
+  height: 5vh;
+  resize: vertical;
+  overflow-y: auto;
+  padding: 10px;
+  font-size: 16px;
 }

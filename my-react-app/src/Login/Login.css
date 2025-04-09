@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+.loginpage-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.loginpage-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.loginpage-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.loginpage-box {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  width: 40vw;
+  text-align: center;
+}
+
+.loginpage-box h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.loginpage-input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.loginpage-input-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 14px;
+}
+
+.loginpage-input-group input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+.loginpage-input-group input:focus {
+  border-color: #128c7e;
+  outline: none;
+}
+
+.loginpage-submit {
+  width: 100%;
+  padding: 10px;
+  background-color: #128c7e;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.loginpage-submit:hover {
+  background-color: #1dad9c;
+}
