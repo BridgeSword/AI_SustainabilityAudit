@@ -1,65 +1,155 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RightPanel.css";
+import NavBar from "../NavBar/NavBar.jsx"; 
+import { useGlobalWebSocket } from "../context/WebSocketContext.jsx";
 
 const RightPanel = ({ formData }) => {
   const [chatHistory, setChatHistory] = useState([
-    { role: "assistant", content: "Hello! How can I help you today? Please first fill out the info in the left part!" }
+    {
+      role: "assistant",
+      content: "Hello! How can I help you today? Please first fill out the info in the left part!"
+    }
   ]);
   const [chatInput, setChatInput] = useState("");
+  const [isWaitingReport, setIsWaitingReport] = useState(false); 
+  const [isReportGenerating, setIsReportGenerating] = useState(false); 
+
+
+  const [progress, setProgress] = useState(0);
+  const progressTimerRef = useRef(null);
+
   const chatHistoryRef = useRef(null);
-  const ws = useRef(null);
   const navigate = useNavigate();
   const textareaRef = useRef(null);
 
+  const globalWs = useGlobalWebSocket();
+
   useEffect(() => {
     if (!formData) return;
+    if (!globalWs) return; 
 
-    ws.current = new WebSocket("ws://localhost:8765");
+    if (globalWs.readyState === WebSocket.OPEN) {
+      sendPlanData();
+    } else {
+      globalWs.onopen = () => {
+        console.log("Global WebSocket Connected from RightPanel");
+        sendPlanData();
+      };
+    }
+  }, [formData, globalWs]);
 
-    ws.current.onopen = () => {
-      console.log("WebSocket Connected");
-      ws.current.send(JSON.stringify(formData));
-      setChatHistory((prev) => [
-        ...removeApproves(prev), 
-        { role: "assistant", content: "Thinking...", isThinking: true }
-      ]);
-    };
+  const sendPlanData = () => {
+    if (!globalWs) return;
+    console.log("Sending plan data via global WS...");
 
-    ws.current.onmessage = (event) => {
+    globalWs.send(
+      JSON.stringify({
+        standard: formData.standard,
+        goal: formData.carboGoal,
+        plan: formData.carbonPlan,
+        action: formData.carbonAction,
+        company: "GreenEarth",
+        device: "cpu",
+        genai_model: "ollama-llama3"
+      })
+    );
+
+    setChatHistory((prev) => [
+      ...removeApproves(prev),
+      { role: "assistant", content: "Generating plan...", isThinking: true }
+    ]);
+
+
+    setProgress(0);
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+    }
+    const start = Date.now();
+    const total = 120000; 
+
+    progressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const p = Math.min(100, (elapsed / total) * 100);
+      setProgress(p);
+      if (p >= 100) {
+        clearInterval(progressTimerRef.current);
+      }
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (!globalWs) return;
+
+    const handleMessage = (event) => {
       const receivedData = JSON.parse(event.data);
+
       setChatHistory((prev) => {
         let newHistory = [...removeApproves(prev)];
 
         if (receivedData.status === "thinking") {
           newHistory[newHistory.length - 1] = {
             ...newHistory[newHistory.length - 1],
-            content: `🤔 ${receivedData.progress}` 
+            content: `🤔 ${receivedData.progress}`
           };
         } else if (receivedData.status === "processing") {
           newHistory[newHistory.length - 1] = {
             ...newHistory[newHistory.length - 1],
             content: `⏳ ${receivedData.progress}`
           };
-        } else if (receivedData.status === "completed") {
+        }
+
+
+        if (
+          receivedData.task_status === "SUCCESS" &&
+          receivedData.response &&
+          typeof receivedData.response === "object"
+        ) {
+  
+          if (progressTimerRef.current) {
+            clearInterval(progressTimerRef.current);
+          }
+          setProgress(100)
+          ;
+
+          const resultStr = Object.entries(receivedData.response)
+            .map(([k, v]) => `**${k}**\n${v}`)
+            .join("\n\n");
+
           newHistory[newHistory.length - 1] = {
             role: "assistant",
             content: "",
-            fullContent: receivedData.result,
+            fullContent: resultStr,
             isThinking: false,
-            showApprove: false
+            showApprove: !isWaitingReport
           };
-          simulateTyping(newHistory.length - 1, receivedData.result);
+
+          if (isWaitingReport) {
+            setIsWaitingReport(false);
+
+            if (isReportGenerating) {
+              setIsReportGenerating(false);
+            }
+
+            navigate("/test", {
+              state: {
+                waitForSocket: true,
+                loading: false,
+                reportData: resultStr
+              }
+            });
+          }
         }
+
         return newHistory;
       });
     };
 
+    globalWs.addEventListener("message", handleMessage);
     return () => {
-      if (ws.current) ws.current.close();
+      globalWs.removeEventListener("message", handleMessage);
     };
-  }, [formData]);
-  
+  }, [globalWs, isWaitingReport, isReportGenerating, navigate]);
 
   useEffect(() => {
     if (chatHistoryRef.current) {
@@ -67,6 +157,12 @@ const RightPanel = ({ formData }) => {
     }
   }, [chatHistory]);
 
+  const removeApproves = (history) => {
+    return history.map((chat) => ({
+      ...chat,
+      showApprove: false
+    }));
+  };
 
   const parseFormattedText = (text) => {
     return text.split("\n").map((line, index) => {
@@ -105,8 +201,6 @@ const RightPanel = ({ formData }) => {
     el.style.height = "auto";
     const style = window.getComputedStyle(el);
     let lineHeight = style.lineHeight;
-    console.log(lineHeight)
-    console.log(el.scrollHeight)
     if (lineHeight === "normal") {
       lineHeight = 54;
     } else {
@@ -118,52 +212,19 @@ const RightPanel = ({ formData }) => {
       el.style.height = "5vh";
     }
   };
-  
-  
-  
-  const removeApproves = (history) => {
-    return history.map((chat) => ({
-      ...chat,
-      showApprove: false
-    }));
-  };
-
-  const simulateTyping = (index, fullText) => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setChatHistory((prev) => {
-        const newHistory = [...prev];
-        newHistory[index] = {
-          ...newHistory[index],
-          content: fullText.substring(0, i)
-        };
-        return newHistory;
-      });
-      i++;
-      if (i > fullText.length) {
-        clearInterval(interval);
-        setChatHistory((prev) => {
-          let updatedHistory = [...prev];
-          updatedHistory[index] = {
-            ...updatedHistory[index],
-            showApprove: true 
-          };
-          return updatedHistory;
-        });
-      }
-    }, 50);
-  };
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
 
     const userMessage = { role: "user", content: chatInput.trim() };
-    setChatHistory((prev) => [...removeApproves(prev), userMessage]); 
+    setChatHistory((prev) => [...removeApproves(prev), userMessage]);
     setChatInput("");
 
-    ws.current.send(JSON.stringify({ message: chatInput.trim() }));
-    
+    if (globalWs && globalWs.readyState === WebSocket.OPEN) {
+      globalWs.send(JSON.stringify({ message: chatInput.trim() }));
+    }
+
     if (textareaRef.current) {
       textareaRef.current.style.height = "5vh";
     }
@@ -175,49 +236,99 @@ const RightPanel = ({ formData }) => {
   };
 
   const handleApprove = () => {
-    console.log("Approved");
+    navigate("/test", {
+      state: {
+        proceed: true
+      }
+    });
+  };
 
-    if (ws.current) {
-      ws.current.close();
-      console.log("WebSocket Closed");
-    }
-
-    navigate("/test");
+  
+  const ProgressBar = ({ progress }) => {
+    return (
+      <div
+        style={{
+          width: "100%",         
+          backgroundColor: "#eee",
+          marginTop: "8px",
+          height: "12px",        
+          borderRadius: "6px",   
+          overflow: "hidden"     
+        }}
+      >
+        <div
+          style={{
+            width: progress + "%",
+            height: "100%",
+            backgroundColor: "#128C7E",
+            transition: "width 1s linear",
+            borderRadius: "1px" 
+          }}
+        />
+      </div>
+    );
   };
 
   return (
-    <div className="chat-box-job">
-      <div className="chat-history-job2" ref={chatHistoryRef}>
-        {chatHistory.map((chat, index) => (
-          <div key={index} className={`chat-message-wrapper ${chat.role}`}>
-            {chat.role === "assistant" && (
-              <img src="/bot.png" alt="Bot Icon" className="chat-icon" />
-            )}
-            <div className={`chat-message-job ${chat.role === "assistant" && index !== 0 ? "with-approve" : ""}`}>
-              <div>{parseFormattedText(chat.content)}</div>
-              {chat.role === "assistant" && chat.showApprove && (
-                <button className="approve-button" onClick={handleApprove}>
-                  Approve
-                </button>
-              )}
-            </div>
-            {chat.role === "user" && (
-              <img src="/user.png" alt="User Icon" className="chat-icon" />
-            )}
+    <>
+      <NavBar />
+      {isReportGenerating ? (
+        <div className="full-loading-container">
+          <h2>Generating final report...</h2>
+          <p>Please wait while the system finalizes the data</p>
+        </div>
+      ) : (
+        <div className="chat-box-job">
+          <div className="chat-history-job2" ref={chatHistoryRef}>
+            {chatHistory.map((chat, index) => {
+              const isAssistant = chat.role === "assistant";
+              const isGenerating =
+                chat.content?.startsWith("Generating plan...") ||
+                chat.content?.startsWith("🤔") ||
+                chat.content?.startsWith("⏳");
+
+              return (
+                <div key={index} className={`chat-message-wrapper ${chat.role}`}>
+                  {isAssistant && <img src="/bot.png" alt="Bot Icon" className="chat-icon" />}
+                  <div className={`chat-message-job ${isAssistant && index !== 0 ? "with-approve" : ""}`}>
+                    <div>
+                      {parseFormattedText(chat.content || chat.fullContent || "")}
+                      {isAssistant && isGenerating && <ProgressBar progress={progress} />}
+                    </div>
+                    {isAssistant && chat.showApprove && (
+                      <button className="approve-button" onClick={handleApprove}>
+                        Approve
+                      </button>
+                    )}
+                  </div>
+                  {chat.role === "user" && (
+                    <img src="/user.png" alt="User Icon" className="chat-icon" />
+                  )}
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-      <form onSubmit={handleChatSubmit}>
-        <textarea
-          value={chatInput}
-          onChange={(e) => setChatInput(e.target.value)}
-          onInput={autoResizeChat}
-          placeholder="Enter your changes here..."
-          className="chat-input"
-        ></textarea>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+
+          <form onSubmit={handleChatSubmit}>
+            <textarea
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onInput={autoResizeChat}
+              placeholder="Enter your changes here..."
+              className="chat-input"
+              ref={textareaRef}
+            ></textarea>
+            <button type="submit">Submit</button>
+          </form>
+
+          {isWaitingReport && (
+            <div className="waiting-indicator">
+              <p>Generating report, please wait...</p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 

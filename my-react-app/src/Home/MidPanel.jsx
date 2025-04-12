@@ -3,7 +3,7 @@ import "./MidPanel.css";
 
 const MidPanel = ({ onGenerate }) => {
   const [reportName, setReportName] = useState("");
-  const [standard, setStandard] = useState("option1");
+  const [standard, setStandard] = useState("iso");
   const [selectedFile, setSelectedFile] = useState(null);
   const [carboGoal, setCarboGoal] = useState("");
   const [carbonPlan, setCarbonPlan] = useState("");
@@ -81,10 +81,10 @@ const MidPanel = ({ onGenerate }) => {
             onChange={(e) => setStandard(e.target.value)}
             className="full-width"
           >
-            <option value="option1">SEC</option>
-            <option value="option2">CSRD</option>
-            <option value="option3">TCFD</option>
-            <option value="option3">ISSB</option>
+            <option value="iso">iso</option>
+            <option value="CSRD">CSRD</option>
+            <option value="TCFD">TCFD</option>
+            <option value="ISSB">ISSB</option>
           </select>
         </div>
 
