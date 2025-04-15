@@ -119,7 +119,7 @@ async def plan_report_ws(
                     while not planning_task.ready():
                         await asyncio.sleep(1)
 
-                    generated_plan = planning_task.get()
+                    generated_plan, context = planning_task.get()
 
                     if generated_plan is None:
                         await ws_manager.send_json_obj(
@@ -157,7 +157,7 @@ async def plan_report_ws(
                 
             elif current_status == WebsocketStatus.generate.value:
                 report_gen_task = start_generating.apply_async(
-                    args=[cr_plan_obj, user_instructions, generated_plan]
+                    args=[cr_plan_obj, user_instructions, generated_plan, context]
                 )
 
                 while not report_gen_task.ready():
