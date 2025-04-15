@@ -1,9 +1,14 @@
 import json
 from typing import Dict, Union
 
+import torch
+
+from sentence_transformers import SentenceTransformer
+
 from ...main import celery_app, milvus_client
 from ...core.utils import get_logger
 from ...core.schemas import CRPlanRequest
+from ...core.config import settings, GAIEmbeddersCollections
 from ...agents import Tool, AgentBase
 from ...agents.prompts import *
 
@@ -42,6 +47,35 @@ def start_thresholding(cr_plan: CRPlanRequest, user_instructions: str) -> Union[
 def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold: int) -> Union[None, Dict]:
     logger.info("------------Executing Planner Process------------")
 
+    embedding_model = "stella_15"
+    emb_model = settings.embedders.model_fields[embedding_model].default
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    embedder = SentenceTransformer(emb_model,
+                                   trust_remote_code=True, 
+                                   device=device)
+    
+    query_embedding = embedder.encode(user_instructions, device=device)
+
+    vector_col_name = GAIEmbeddersCollections.mapping()[embedding_model]
+
+    results = milvus_client.search(
+        collection_name=vector_col_name,
+        anns_field="vector_embs",
+        data=[query_embedding],
+        limit=3,
+        search_params={"metric_type": "L2"}, 
+        output_fields=["text_chunk"]
+    )
+
+    context = ""
+
+    if len(results) > 0:
+        results = "\n".join([f"{i+1}. {chunk}" for i, chunk in enumerate(results)])
+
+        context = ADDITIONAL_CONTEXT.format(context = results)
+
     planner_agent = AgentBase(genai_model=cr_plan.genai_model, 
                               temperature=0.7, 
                               device=cr_plan.device,
@@ -52,7 +86,8 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
                                  device=cr_plan.device,
                                  system_message=SYSTEM_PROMPT_PLAN_EVALUATION)
 
-    plan_instruction = user_instructions
+    plan_instruction = context + "\n\n" + user_instructions
+    plan_instruction.strip()
 
     generated_plan = None
 
@@ -80,5 +115,5 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
             evaluation_agent.clear_history()
             continue
     
-    return generated_plan
+    return generated_plan, context
     

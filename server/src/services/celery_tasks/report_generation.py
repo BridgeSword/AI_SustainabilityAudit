@@ -11,7 +11,7 @@ from ...agents.prompts import *
 logger = get_logger(__name__)
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_generating(cr_plan: CRPlanRequest, user_instructions: str, generated_plan: Dict) -> Union[None, Dict]:
+def start_generating(cr_plan: CRPlanRequest, user_instructions: str, generated_plan: Dict, context: str) -> Union[None, Dict]:
     logger.info("------------Executing Generation Process------------")
 
     logger.info("------------Creating All required Agents------------")
@@ -24,9 +24,14 @@ def start_generating(cr_plan: CRPlanRequest, user_instructions: str, generated_p
     multi_agents = []
 
     for section, desc in generated_plan.items():
-        desc_prompt = [user_instructions, 
-                       ADD_SECTION_CONTEXT.format(section_name=section, 
-                                                  section_ctx=desc)]
+        desc_prompt = []
+
+        if len(context) != 0:
+            desc_prompt = [context]
+
+        desc_prompt += [user_instructions, 
+                        ADD_SECTION_CONTEXT.format(section_name=section, 
+                                                   section_ctx=desc)]
         detailed_desc = desc_agent(desc_prompt, store_history=False)
 
         agent = AgentBase(genai_model=cr_plan.genai_model, 
