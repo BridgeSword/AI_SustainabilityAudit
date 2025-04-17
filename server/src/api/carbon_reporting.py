@@ -5,7 +5,7 @@ from uuid import uuid4
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
-from ..core.utils import get_logger
+from ..core.utils import get_logger, create_multipage_pdf
 from ..core.schemas import *
 from ..core.config import GAIModels
 from ..core.constants import Status
@@ -43,6 +43,8 @@ async def plan_report_ws(
 
     current_status = WebsocketStatus.plan.value
 
+    report_id = None
+
     try:
         while True:
             if current_status == WebsocketStatus.plan.value:
@@ -59,6 +61,8 @@ async def plan_report_ws(
                     cr_plan_obj.company = cr_plan_req["company"]
 
                     cr_plan_obj.device = cr_plan_req["device"]
+
+                    report_id = uuid4().hex
 
                     user_instructions = USER_INSTRUCTIONS.format(
                         company=cr_plan_obj.company.upper(),
@@ -178,12 +182,18 @@ async def plan_report_ws(
 
                 report_response = {}
 
+                whole_report = []
+
                 for report_dict in generated_report:
                     report_response[report_dict["section"]] = report_dict["agent_output"]
+                    whole_report.append(report_dict["agent_output"])
                 
                 # Add References to generated report independently by fetching it from public sources and vector database
 
                 # Stitch the whole report and save the PDF File
+                whole_report = "\n\n".join(whole_report)
+
+                create_multipage_pdf(whole_report, f"carbon_report_{report_id}")
 
                 await ws_manager.send_json_obj(
                     CRPlanResponse(

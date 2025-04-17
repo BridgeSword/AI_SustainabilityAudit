@@ -46,7 +46,7 @@ from .api import checks, carbon_reporting, embeddings
 app = FastAPI(title=settings.app_name, docs_url="/")
 
 origins = [
-    # "http://localhost:8000",
+    # To be modified to support only the acceptable URLs later
     "*"
 ]
 

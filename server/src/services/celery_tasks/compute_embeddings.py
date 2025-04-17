@@ -1,5 +1,7 @@
 import os
 from glob import glob
+from typing import Union
+from tqdm import tqdm
 
 import pymupdf
 
@@ -68,70 +70,85 @@ def compute_chunks(inputs, text_sents, chunk_size_approx=256, overlap_tokens=20)
 
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_computing(docs_path: str, embedding_model: str, device:str = None):
+def start_computing(docs_path: Union[str, list], 
+                    embedding_model: str, 
+                    device:str = None, 
+                    paths_as_list:list = False):
 
     logger.info("Computing Document Embeddings")
 
-    embedding_model = embedding_model.lower().strip()
+    if embedding_model is None: # uses all models to extract embeddings
+        all_emb_models = GAIEmbeddersCollections.opensource_embedders().keys()
+    else:
+        embedding_model = embedding_model.lower().strip()
+        all_emb_models = [embedding_model]
+    
+    if not paths_as_list:
+        docs_path = docs_path+"/*.pdf" if docs_path[-1] != "/" else docs_path+"*.pdf"
+        docs_path = glob(docs_path)
 
-    docs_path = docs_path+"/*.pdf" if docs_path[-1] != "/" else docs_path+"*.pdf"
+    logger.info(f"Docs path: {docs_path}")
 
-    logger.info(f"Docs path: {docs_path} and genai model: {embedding_model}")
+    for embedding_model in tqdm(all_emb_models):
+        if embedding_model in GAIEmbeddersCollections.opensource_embedders().keys() and os.getenv("USE_EMBEDDERS_LOCALLY"):
+            logger.info("\n\nDownloading and/or loading all required Embedding Models locally!\n\n")
 
-    if embedding_model in GAIEmbeddersCollections.opensource_embedders().keys() and os.getenv("USE_EMBEDDERS_LOCALLY"):
-        logger.info("\n\nDownloading and/or loading all required Embedding Models locally!\n\n")
-
-        # for _, emb_model in settings.embedders.model_fields.items():
-        emb_model = settings.embedders.model_fields[embedding_model].default
-        
-        logger.info(f"Dowloading/Loading and computing chunks for: {emb_model}")
-        embedder = SentenceTransformer(emb_model,
-                                       trust_remote_code=True, 
-                                       device=device)
-        
-        emb_tokenizer = embedder.tokenizer
-
-        for doc_path in glob(docs_path):
-            doc = pymupdf.open(doc_path)
-
-            text_list = []
-
-            for page in doc:
-                text = page.get_text()
-                text_list.append(text)
-
-            sent_tokenized_text = sent_tokenize(" ".join(text_list))
-
-            emb_inps = emb_tokenizer(sent_tokenized_text, **settings.embedders.default_emb_params)
-
-            emb_chunks = compute_chunks(emb_inps, sent_tokenized_text, 
-                                        chunk_size_approx=256, overlap_tokens=20)
-
-            logger.info(f"Chunking completed for: {emb_model}")
-
-            logger.info(f"Pushing embeddings to Milvus Vector Store with emb_model_name as {emb_model}!")
-
-            emb_chunks_joined = [" ".join(i) for i in emb_chunks]
+            emb_model = settings.embedders.model_fields[embedding_model].default
             
-            computed_embeddings = embedder.encode(emb_chunks_joined, 
-                                                  show_progress_bar="tqdm", 
-                                                  device=device)
+            logger.info(f"Dowloading/Loading and computing chunks for: {emb_model}")
+            embedder = SentenceTransformer(emb_model,
+                                           trust_remote_code=True, 
+                                           device=device)
             
-            vector_col_name = GAIEmbeddersCollections.mapping()[embedding_model]
+            emb_tokenizer = embedder.tokenizer
 
-            for chunk_idx, chunk in enumerate(computed_embeddings):
-                chunk_data = {
-                    "vector_embs": chunk,
-                    "head_embs": chunk[:128],
-                    "text_chunk": emb_chunks_joined[chunk_idx],
-                    "emb_model_name": emb_model
-                }
+            for doc_path in docs_path:
+                doc = pymupdf.open(doc_path)
 
-                milvus_client.insert(collection_name=vector_col_name, 
-                                        data=chunk_data)
+                text_list = []
 
-        del embedder
-        clear_torch_cache()
+                for page in doc:
+                    text = page.get_text()
+                    text_list.append(text)
+
+                sent_tokenized_text = sent_tokenize(" ".join(text_list))
+
+                emb_inps = emb_tokenizer(sent_tokenized_text, **settings.embedders.default_emb_params)
+
+                emb_chunks = compute_chunks(emb_inps, 
+                                            sent_tokenized_text, 
+                                            chunk_size_approx=256, 
+                                            overlap_tokens=20)
+
+                logger.info(f"Chunking completed for: {emb_model}")
+
+                logger.info(f"Pushing embeddings to Milvus Vector Store with emb_model_name as {emb_model}!")
+
+                emb_chunks_joined = [" ".join(i) for i in emb_chunks]
+                
+                computed_embeddings = embedder.encode(emb_chunks_joined, 
+                                                    show_progress_bar="tqdm", 
+                                                    device=device)
+                
+                vector_col_name = GAIEmbeddersCollections.mapping()[embedding_model]
+
+                for chunk_idx, chunk in enumerate(computed_embeddings):
+                    chunk_data = {
+                        "vector_embs": chunk,
+                        "head_embs": chunk[:128],
+                        "text_chunk": emb_chunks_joined[chunk_idx],
+                        "emb_model_name": emb_model
+                    }
+
+                    milvus_client.insert(collection_name=vector_col_name, 
+                                         data=chunk_data)
+
+            del embedder
+            clear_torch_cache()
+
+        else:
+            # handle the closed source model embeddings
+            continue
     
     return True
     

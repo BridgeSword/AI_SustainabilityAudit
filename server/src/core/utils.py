@@ -5,6 +5,8 @@ import hashlib
 
 import torch
 
+from markdown_pdf import MarkdownPdf, Section
+
 
 def get_logger(scope):
     logger = logging.getLogger(scope)
@@ -13,6 +15,13 @@ def get_logger(scope):
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
 
     return logger
 
@@ -81,3 +90,9 @@ def extract_json(s, index=0):
 
 def thresolder(curr_val, max_val):
     return min(curr_val, max_val)
+
+def create_multipage_pdf(text, filename="output.pdf"):
+    pdf = MarkdownPdf()
+
+    pdf.add_section(Section(text.strip(), toc=False))
+    pdf.save(filename)

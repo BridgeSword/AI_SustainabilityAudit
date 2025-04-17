@@ -1,8 +1,11 @@
 import os
-from typing import Annotated
+from typing import Annotated, List
+
+import torch
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from fastapi import File, UploadFile, HTTPException
 
 from celery.result import AsyncResult
 
@@ -39,6 +42,41 @@ async def generate_embeddings(
     )
 
     return JSONResponse(content={"task_id": emb_task.id})
+
+
+@router.post(
+        "/upload_file",
+        tags=["Document Embeddings"], 
+        description="Accepts a PDF file, extracts the contents and starts computing the embeddings")
+async def upload_file(files: List[UploadFile] = File(...)):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    filenames = []
+    docs = []
+
+    for file in files:
+        try:
+            if file.content_type != "application/pdf":
+                raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are allowed.")
+        
+            with open(os.path.join(settings.user_files_path, file.filename), 'wb') as f:
+                while contents := file.file.read(1024 * 1024):
+                    f.write(contents)
+            
+            filenames.append(file.filename)
+            docs.append(os.path.join(settings.user_files_path, file.filename))
+
+        except Exception:
+            raise HTTPException(status_code=500, detail='Something went wrong')
+        
+        finally:
+            file.file.close()
+
+    emb_task = start_computing.apply_async(
+        args=[docs, None, device, True]
+    )
+            
+    return JSONResponse(content={"task_id": emb_task.id, "status": "Uploaded and started embedding"})
 
 
 @router.get("/status/{task_id}", tags=["Document Embeddings"])
