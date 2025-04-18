@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pymilvus import MilvusClient
 
+from motor import motor_asyncio
+
 from celery import Celery
 
 from dotenv import load_dotenv
@@ -33,6 +35,14 @@ milvus_client = MilvusClient(
     uri=os.getenv("MILVUS_URI"),
     token=os.getenv("MILVUS_TOKEN"),
 )
+
+MONGO_URL = f"mongodb://{os.getenv('MONGO_ROOT_USER')}:{os.getenv('MONGO_ROOT_PASS')}@{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_CORE_DB')}?retryWrites=true&w=majority"
+
+mongo_client = motor_asyncio.AsyncIOMotorClient(MONGO_URL)
+core_db = mongo_client.get_database(os.getenv('MONGO_CORE_DB'))
+
+def get_mongo_client():
+     return core_db
 
 celery_app = Celery("sd-marag-celery", 
                     broker=os.getenv("CELERY_BROKER"), 
@@ -64,7 +74,7 @@ app.include_router(checks.router)
 app.include_router(embeddings.router, prefix="/embeddings/v1")
 app.include_router(carbon_reporting.router, prefix="/sdmarag/v1")
 
-app.add_event_handler("startup", start_app_handler(app, milvus_client))
+app.add_event_handler("startup", start_app_handler(app, milvus_client, mongo_client))
 
 app.exception_handler(validation_exception_handler)
 

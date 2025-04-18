@@ -76,7 +76,10 @@ async def upload_file(files: List[UploadFile] = File(...)):
         args=[docs, None, device, True]
     )
             
-    return JSONResponse(content={"task_id": emb_task.id, "status": "Uploaded and started embedding"})
+    return JSONResponse(content={
+        "task_id": emb_task.id, 
+        "status": "Uploaded and started embedding"
+        })
 
 
 @router.get("/status/{task_id}", tags=["Document Embeddings"])
