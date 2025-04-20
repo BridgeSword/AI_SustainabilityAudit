@@ -3,7 +3,7 @@ from typing import Any
 
 from openai import OpenAI
 
-from ..services.genai_apis import call_genaiapi, call_hf_model
+from ..services.genai_apis import call_genaiapi#, call_hf_model
 from ..core.utils import get_logger, extract_json
 
 
@@ -93,6 +93,8 @@ class AgentBase:
                                      temp=self.temperature, 
                                      genai_model=self.genai_model)
         else:
-            response = call_hf_model(self.genai_model, self.history)
+            # TODO: Implement calling the HuggingFace API from here by passing in all the required Chat Parameters
+            # response = call_hf_model(self.genai_model, self.history)
+            pass
         
         return response

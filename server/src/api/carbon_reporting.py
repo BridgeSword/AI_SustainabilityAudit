@@ -72,7 +72,7 @@ async def plan_report_ws(
                     cr_plan_obj.company = cr_plan_req["company"]
 
                     report = ReportModel(
-                        user_id=user_id
+                        user_id=user_id,
                         standard=cr_plan_obj.standard, 
                         goal=cr_plan_obj.goal, 
                         user_plan=cr_plan_obj.plan, 
@@ -246,11 +246,11 @@ async def plan_report_ws(
                     section_update = await section_collection.find_one_and_update(
                         {"_id": req_section_ids[idx]},
                         {"$set": 
-                         {
-                             "description": report_dict["description"],
-                             "agentOutput": report_dict["agent_output"]
-                         }
-                         }
+                            {
+                                "description": report_dict["description"],
+                                "agentOutput": report_dict["agent_output"]
+                            }
+                        }
                     )
                 
                 # Add References to generated report independently by fetching it from public sources and vector database

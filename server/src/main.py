@@ -74,7 +74,7 @@ app.include_router(checks.router)
 app.include_router(embeddings.router, prefix="/embeddings/v1")
 app.include_router(carbon_reporting.router, prefix="/sdmarag/v1")
 
-app.add_event_handler("startup", start_app_handler(app, milvus_client, mongo_client))
+app.add_event_handler("startup", start_app_handler(app, milvus_client))
 
 app.exception_handler(validation_exception_handler)
 

@@ -8,8 +8,8 @@ from . import MongoBase
 class SectionModel(MongoBase):
     name: str = Field(...)
     initial_summary: str = Field(...)
-    description: str = Field(..., default=None)
-    agent_output: Optional[List] = Field(..., default=None, alias="agentOutput")
+    description: str = Field(alias="description", default=None)
+    agent_output: Optional[List] = Field(alias="agentOutput", default=None)
 
     model_config = ConfigDict(
         populate_by_name=True,

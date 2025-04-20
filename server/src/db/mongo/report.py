@@ -13,9 +13,9 @@ class ReportModel(MongoBase):
     goal: str = Field(...)
     user_plan: str = Field(...)
     action: str = Field(...)
-    company: str = Field(..., default=None)
+    company: str = Field(alias="company", default=None)
 
-    generated_report: str = Field(..., default=None)
+    generated_report: str = Field(alias="generatedReport", default=None)
 
     model_config = ConfigDict(
         populate_by_name=True,
