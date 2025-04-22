@@ -1,26 +1,32 @@
-Frontend using REACT
+Frontend and Backend of MARAG
 
+## TODO:
 
-TODO:
+1. Modify plan/AI Edit
 
+2. History
 
-1. Loading for preview
+## Build:
+#### Frontend:
+1. go to my-creat-app folder, npm install
 
-2. Design TEST API
+2. npm run dev
 
-3. UI change for preview page (left align, AI EDIT and EDIT manually), AI Edit Page(DELETE SAVE)
+#### Docker:
+1. source .env
 
-4. Modify some disharmonious colors and hover colors (#128C7E)
+2. docker-compose -f docker-compose-sdmarag.yaml up -d
 
-5. Sign in function (?)
+#### Backend:
+Need install poetry and dependencies first, then
 
-TO USE:
+1. poetry run bash start.sh
 
-1. git clone https://github.coecis.cornell.edu/jy2222/Frontend_CarbonReport.git
+## USE:
 
-2. go to my-creat-app folder, npm install
+visit
 
-3. npm run dev
+http://localhost:5173/
 
 
 
