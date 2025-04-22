@@ -13,6 +13,10 @@ Remember to follow the JSON format as below:
 }
 """
 
+ADDITIONAL_CONTEXT = """\
+Here is some additional proprietary context, which can be used to ground your decisions:
+{context}
+"""
 
 USER_INSTRUCTIONS = """\
 User Instructions are as follows:
@@ -136,7 +140,7 @@ Finally, you need to follow all the above steps strictly to write the Carbon Sec
 """
 
 ADD_SECTION_DESCRIPTION = """
-\nBelow are the section name and section description. You should while generating the details of the carbon report section while following all the provided system instructions.
+\nBelow are the section name and section description. You should use these to generate the details of the carbon report section while following all the provided system instructions.
 
 ============================================
 Section Name:

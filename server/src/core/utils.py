@@ -3,6 +3,7 @@ import json
 import logging
 import hashlib
 
+from markdown_pdf import MarkdownPdf, Section
 import torch
 
 
@@ -81,3 +82,18 @@ def extract_json(s, index=0):
 
 def thresolder(curr_val, max_val):
     return min(curr_val, max_val)
+
+def RawJSONDecoder(index):
+    class _RawJSONDecoder(json.JSONDecoder):
+        end = None
+
+        def decode(self, s, *_):
+            data, self.__class__.end = self.raw_decode(s, index)
+            return data
+    return _RawJSONDecoder
+
+def create_multipage_pdf(text, filename="output.pdf"):
+    pdf = MarkdownPdf()
+
+    pdf.add_section(Section(text.strip(), toc=False))
+    pdf.save(filename)

@@ -135,19 +135,45 @@
     margin-bottom: 1vh;
   }
   
-  .file-details {
+  .file-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    padding: 0 20px;
-    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #dbdbdb;
+  }
+  /* New styles for multiple file uploads */
+  .files-list {
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    margin: 0 auto;
+    gap: 10px;
+    max-height: 30vh;
+    overflow-y: auto;
+  }
+  .file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+  }
+  
+  .file-icon {
+    width: 24px;
+    height: 24px;
   }
   
   .file-name {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #525151;
-    flex-grow: 1;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
   }
   
   .delete-button-upload {

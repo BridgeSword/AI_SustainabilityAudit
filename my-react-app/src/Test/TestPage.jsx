@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./TestPage.css";
 import NavBar from "../NavBar/NavBar.jsx";
 import { useGlobalWebSocket } from "../context/WebSocketContext";
+import html2pdf from "html2pdf.js";
 
 const TestPage = () => {
   const navigate = useNavigate();
@@ -271,18 +272,74 @@ const TestPage = () => {
   };
 
   const handleDownload = () => {
-    const reportContent = sections
-      .map((section) => `### ${section.title}\n\n${section.content}`)
-      .join("\n\n");
-
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Carbon_Report.txt";
-    link.click();
-    URL.revokeObjectURL(url);
+    const htmlContent = sections
+      .map(({ title, content }, i) => {
+        const transformed = content
+          .replace(/^={3,}$/gm, '<hr>')
+          .replace(/^-{3,}$/gm, '<hr>')
+          .replace(/^###\s*(.+)$/gm, '<strong>$1</strong><br>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+  
+        const breakAfter = i < sections.length - 1
+          ? 'page-break-after: always;'
+          : '';
+  
+        return `
+          <div class="page" style="
+            break-inside: avoid;
+            page-break-inside: avoid;
+            ${breakAfter}
+          ">
+            <h3>${title}</h3>
+            <div>${transformed}</div>
+          </div>
+        `;
+      })
+      .join('');
+  
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .page {
+          /* never split this container */
+          break-inside: avoid;
+          page-break-inside: avoid;
+          -webkit-column-break-inside: avoid;
+          -moz-column-break-inside: avoid;
+          margin-bottom: 1.5em;
+        }
+        h3 {
+          margin-bottom: .5em;
+          font-size: 1.2em;
+        }
+        hr {
+          border: none;
+          border-top: 2px solid #333;
+          margin: 1em 0;
+        }
+        div, br {
+          margin-bottom: .5em;
+          line-height: 1.4;
+        }
+        strong { font-weight: bold; }
+      </style>
+      ${htmlContent}
+    `;
+  
+    html2pdf()
+      .set({
+        margin:       0.5,
+        filename:     'Carbon_Report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      })
+      .from(wrapper)
+      .save();
   };
+  
 
   const enterPreviewMode = () => {
     setPreviewMode(true);

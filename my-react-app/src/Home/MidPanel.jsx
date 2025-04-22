@@ -4,14 +4,28 @@ import "./MidPanel.css";
 const MidPanel = ({ onGenerate }) => {
   const [reportName, setReportName] = useState("");
   const [standard, setStandard] = useState("iso");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [carboGoal, setCarboGoal] = useState("");
   const [carbonPlan, setCarbonPlan] = useState("");
   const [carbonAction, setCarbonAction] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setSelectedFile(file);
+  const validatePdfFile = (file) => {
+    return file.type === "application/pdf";
+  };
+
+
+   const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    
+    // Filter for only PDF files
+    const pdfFiles = files.filter(file => validatePdfFile(file));
+    
+    if (pdfFiles.length > 0) {
+      setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
+    } else if (files.length > 0) {
+      alert("Only PDF files are allowed.");
+    }
   };
 
   const handleDragOver = (e) => {
@@ -22,31 +36,54 @@ const MidPanel = ({ onGenerate }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      setSelectedFile(file);
+    
+    const files = Array.from(e.dataTransfer.files);
+    
+    // Filter for only PDF files
+    const pdfFiles = files.filter(file => validatePdfFile(file));
+    
+    if (pdfFiles.length > 0) {
+      setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
+    } else if (files.length > 0) {
+      alert("Only PDF files are allowed.");
     }
   };
 
-  const handleDeleteFile = (e) => {
-    e.preventDefault();
-    setSelectedFile(null);
+  const handleDeleteFile = (index) => {
+    setSelectedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
-  const handleGenerate = (e) => {
+
+  const handleGenerate = async (e) => {
     e.preventDefault();
-    
-    const formData = {
-      reportName,
-      standard,
-      carboGoal,
-      carbonPlan,
-      carbonAction,
-    };
 
-    onGenerate(formData);
+    if (selectedFiles.length > 0) {
+      const uploadForm = new FormData();
+      selectedFiles.forEach(file => uploadForm.append('files', file));
+      try {
+        setIsUploading(true);
+        const resp = await fetch('http://localhost:9092/embeddings/v1/upload_file', {
+          method: 'POST',
+          body: uploadForm,
+        });
+        if (!resp.ok) {
+          const text = await resp.text();
+          throw new Error(text);
+        }
+        const result = await resp.json();
+        console.log('Embedding upload response:', result);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        alert('Failed to upload PDF files.');
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
+    onGenerate({ reportName, standard, carboGoal, carbonPlan, carbonAction });
   };
-
   const autoResize = (e) => {
     e.target.style.height = "auto";
     e.target.style.height = `${e.target.scrollHeight}px`;
@@ -89,38 +126,44 @@ const MidPanel = ({ onGenerate }) => {
         </div>
 
         <div className="form-group">
-          <label>Sample Report Upload (Optional)</label>
-          {selectedFile ? (
-            <div className="uploaded-content">
-              <img src="/file.jpg" alt="File Icon" />
-              <p className="candidate-upload-title">File uploaded: </p>
-              <div className="file-details">
-                <p className="file-name">{selectedFile.name}</p>
-                <button
-                  className="delete-button-upload"
-                  onClick={handleDeleteFile}
-                >
-                  X
-                </button>
-              </div>
+          <label>Sample Reports Upload (PDF Only)</label>
+          <label
+            htmlFor="fileUpload"
+            className="upload-box"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <span className="upload-instruction">
+              Click or drag to upload PDF files
+            </span>
+            <input
+              type="file"
+              id="fileUpload"
+              onChange={handleFileUpload}
+              className="file-input"
+              accept=".pdf"
+              multiple
+            />
+          </label>
+          
+          {selectedFiles.length > 0 && (
+            <div className="files-list">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <img src="/file.jpg" alt="PDF Icon" className="file-icon" />
+                    <p className="file-name">{file.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="delete-button-upload"
+                    onClick={() => handleDeleteFile(index)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <label
-              htmlFor="fileUpload"
-              className="upload-box"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              <span className="upload-instruction">
-                Click or drag to upload file
-              </span>
-              <input
-                type="file"
-                id="fileUpload"
-                onChange={handleFileUpload}
-                className="file-input"
-              />
-            </label>
           )}
         </div>
 
