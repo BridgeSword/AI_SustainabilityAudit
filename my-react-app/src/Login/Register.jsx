@@ -17,12 +17,13 @@ const Register = () => {
       return;
     }
     try {
-        const response = await fetch("http://localhost:8000/sign-up", {
+        const response = await fetch("http://localhost:9092/sign-up", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ user_email: username, pwd: password })
+          body: JSON.stringify({ user_email: username, password: password }),
+          credentials: "include"
         });
         const data = await response.json();
         if (response.ok && data.success) {

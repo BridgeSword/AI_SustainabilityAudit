@@ -81,17 +81,16 @@ services:
       - "8000:3000"
     depends_on:
       - milvus
-
   mongodb:
     container_name: sdmarag-mongodb
     image: mongo
     volumes:
-      - ./volumes/mongodb:/mongodb
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb:/mongodb
     ports:
-      - "27017:27017"
+      - 27017:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS}
 
 
 networks:
