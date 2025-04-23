@@ -17,6 +17,13 @@ Frontend and Backend of MARAG
 
 2. docker-compose -f docker-compose-sdmarag.yaml up -d
 
+#### ollama:
+if using ollama
+
+1. brew install Ollama/tap/ollama
+
+2. ollama pull llama3
+
 #### Backend:
 Need install poetry and dependencies first, then
 
