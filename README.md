@@ -24,6 +24,8 @@ if using ollama
 
 2. ollama pull llama3
 
+3. ollama serve --host 0.0.0.0 --port 11434
+
 #### Backend:
 Need install poetry and dependencies first, then
 
