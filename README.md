@@ -2,9 +2,11 @@ Frontend and Backend of MARAG
 
 ## TODO:
 
-1. Modify plan/AI Edit
+1. Modify plan
 
-2. History
+2. AI Edit
+
+3. History
 
 ## Build:
 #### Frontend:
