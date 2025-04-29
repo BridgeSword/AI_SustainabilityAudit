@@ -9,6 +9,7 @@ class UserModel(MongoBase):
     username: Optional[str] = Field(default=None)
     email: EmailStr = Field(...)
     password: str = Field(...)
+    company: str = Field(...)
     created_at: Optional[str] = Field(alias="createdAt", default=None)
 
     model_config = ConfigDict(
@@ -18,7 +19,8 @@ class UserModel(MongoBase):
             "example": {
                 "username": "John Doe",
                 "email": "jdoe@example.com",
-                "password": "password"
+                "password": "password",
+                "company": "company name"
             }
         }
     )

@@ -69,7 +69,8 @@ async def signup(
     user_collection = db.get_collection("users")
     user_info = UserModel(
         email=user_sign_up_request.user_email,
-        password=user_sign_up_request.password
+        password=user_sign_up_request.password,
+        company=user_sign_up_request.company_name
     )
 
     user_operation_response = UserOperationResponse()

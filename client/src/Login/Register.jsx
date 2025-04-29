@@ -7,6 +7,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
   
   const navigate = useNavigate();
 
@@ -22,13 +23,14 @@ const Register = () => {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ user_email: username, password: password }),
+          body: JSON.stringify({ user_email: username, password: password, company_name: companyName }),
         });
         const data = await response.json();
         if (response.ok && data.success) {
           console.log("Register successful", data);
           sessionStorage.setItem("username", username);
           sessionStorage.setItem("user_id", data.user_id);
+          sessionStorage.setItem("company_name", companyName);
           navigate("/");
         } else {
           alert(data.message || "Registration failed");
@@ -75,6 +77,16 @@ const Register = () => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="reg-input-group">
+              <label htmlFor="companyName">Company Name</label>
+              <input
+                type="text"
+                id="companyName"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
                 required
               />
             </div>

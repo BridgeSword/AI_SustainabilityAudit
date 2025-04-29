@@ -134,6 +134,7 @@ class UserLoginRequest(BaseModel):
 class UserSignUpRequest(BaseModel):
     user_email: EmailStr
     password: str
+    company_name: str
 
 class UserChangePwdRequest(BaseModel):
     user_email: EmailStr
