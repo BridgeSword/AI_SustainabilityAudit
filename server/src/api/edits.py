@@ -205,7 +205,7 @@ async def ai_edits(
     edit_instruction = context + "\n\n" + user_instructions + "\n\n" + latest_content
     edit_instruction = edit_instruction.strip()
 
-    edit_agent = AgentBase(genai_model=genai_model, 
+    edit_agent = AgentBase(genai_model=genai_model_variant, 
                            temperature=0.7, 
                            device=device, 
                            system_message=SYSTEM_PROMPT_AI_EDIT
