@@ -166,6 +166,7 @@ volumes/
 # App-related
 .env
 .vscode/
+test.py
 
 # Server-related
 server/src/carbon_reports
