@@ -1,7 +1,9 @@
 import time
 import asyncio
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from bson.objectid import ObjectId
 
@@ -29,14 +31,14 @@ router = APIRouter()
 
 ws_manager = WSConnectionManager()
 
-report_collection = db.get_collection("reports")
-section_collection = db.get_collection("sections")
-
 
 @router.websocket("/ws/plan_generate")
 async def plan_report_ws(
-    websocket: WebSocket
+    websocket: WebSocket,
+    db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
+    report_collection = db.get_collection("reports")
+    section_collection = db.get_collection("sections")
     
     await ws_manager.connect(websocket)
     
@@ -84,7 +86,7 @@ async def plan_report_ws(
                         report.model_dump(by_alias=True, exclude=["id"])
                     )
 
-                    cr_plan_obj.device = cr_plan_req["device"]
+                    cr_plan_obj.device = cr_plan_req.get("device", "cpu")
 
                     user_instructions = USER_INSTRUCTIONS.format(
                         company=cr_plan_obj.company.upper(),
@@ -94,7 +96,7 @@ async def plan_report_ws(
                         carbon_action=cr_plan_obj.action
                     )
 
-                    gai_model = cr_plan_req["genai_model"].lower().split("-")
+                    gai_model = cr_plan_req.get("genai_model", "openai-4o").lower().split("-")
 
                     if len(gai_model) < 2:
                         await ws_manager.send_json_obj(

@@ -51,7 +51,7 @@ celery_app = Celery("sd-marag-celery",
                     )
 
 
-from .api import checks, carbon_reporting, embeddings
+from .api import checks, carbon_reporting, embeddings, edits
 
 app = FastAPI(title=settings.app_name, docs_url="/")
 
@@ -73,6 +73,7 @@ app.middleware("http")(catch_global_exceptions)
 app.include_router(checks.router)
 app.include_router(embeddings.router, prefix="/embeddings/v1")
 app.include_router(carbon_reporting.router, prefix="/sdmarag/v1")
+app.include_router(edits.router, prefix="/edits/v1")
 
 app.add_event_handler("startup", start_app_handler(app, milvus_client))
 

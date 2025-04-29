@@ -59,6 +59,29 @@ class CarbonReportGenResponse(BaseModel):
     report_status: str = Field(default=None)
 
 
+class ManualEditsRequest(BaseModel):
+    section_id: str
+    user_edit: str
+
+
+class GenericResponse(BaseModel):
+    response: str
+    status: str
+
+
+class AIEditsRequest(BaseModel):
+    report_id: str
+    section_id: str
+    user_request: str
+    genai_model: str = Field(default=None)
+    device: str = Field(default=None)
+
+
+class AIEditsResponse(BaseModel):
+    section_id: str
+    modified_section: str
+
+
 class ComputeDocumentEmbeddingsRequest(BaseModel):
     docs_path: str
     embedding_model: str

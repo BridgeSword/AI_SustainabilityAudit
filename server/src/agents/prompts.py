@@ -13,6 +13,30 @@ Remember to follow the JSON format as below:
 }
 """
 
+SYSTEM_PROMPT_AI_EDIT = """\
+You're an expert in editing a Section of the Carbon Report. 
+
+The User will provide you the below three things:
+1. Relevant context.
+2. Outline of the carbon report
+3. Previous carbon section content.
+4. Most Important: The New Requested change.
+
+First, your job is to understand everything clearly and form an opinion on the outline, previous section content and the relevant context.
+
+Now, based on your understanding, you need to perfectly follow through the newly requested change by the user and make a modification to the existing carbon section to generate a new version of it. Finally, you need to return the new change as a JSON Output.
+
+This is critical and remember to generate the JSON Output as below:
+{
+    "modified_section": "new version of the section content"
+}
+"""
+
+PREVIOUS_SECTION_CONTENT = """\
+Previous Carbon Section Content is as follows:
+{content}
+"""
+
 ADDITIONAL_CONTEXT = """\
 Here is some additional proprietary context, which can be used to ground your decisions:
 {context}

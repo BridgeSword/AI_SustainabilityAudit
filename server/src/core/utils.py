@@ -7,6 +7,8 @@ import torch
 
 from markdown_pdf import MarkdownPdf, Section
 
+from ..core.config import settings
+
 
 def get_logger(scope):
     logger = logging.getLogger(scope)
@@ -95,4 +97,4 @@ def create_multipage_pdf(text, filename="output.pdf"):
     pdf = MarkdownPdf()
 
     pdf.add_section(Section(text.strip(), toc=False))
-    pdf.save(filename)
+    pdf.save(os.path.join(settings.carbon_reports_path, filename))

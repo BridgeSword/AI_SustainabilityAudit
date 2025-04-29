@@ -87,7 +87,7 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
                                  system_message=SYSTEM_PROMPT_PLAN_EVALUATION)
 
     plan_instruction = context + "\n\n" + user_instructions
-    plan_instruction.strip()
+    plan_instruction = plan_instruction.strip()
 
     generated_plan = None
 
