@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field, field_validator, EmailStr
@@ -148,3 +148,12 @@ class UserOperationResponse(BaseModel):
     success: bool = Field(default=None)
     user_id: str = Field(default=None)
     message: str = Field(default=None)
+    history_list: Optional[List[Dict[str, str]]] = None
+
+class HistoryRequest(BaseModel):
+    report_title: str = Field(default=None)
+    created_at: str = Field(default=None)
+
+class HistoryResponse(BaseModel):
+    success: bool = Field(default=None)
+    report: str = Field(default=None)

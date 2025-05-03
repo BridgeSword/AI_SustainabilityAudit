@@ -10,7 +10,7 @@ from ..main import get_mongo_client
 from typing import Union
 
 from ..db.mongo.user import UserModel
-
+from fastapi.encoders import jsonable_encoder
 
 logger = get_logger(__name__)
 
@@ -19,30 +19,44 @@ router = APIRouter()
 @router.post(
     "/login",
     tags=["User Operations"],
-    response_model=UserOperationResponse)
+    response_model=UserOperationResponse,
+)
 async def login(
-        user_login_request: UserLoginRequest,
-        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+    user_login_request: UserLoginRequest,
+    db: AsyncIOMotorDatabase = Depends(get_mongo_client),
 ):
-    user_collection = db.get_collection("users")
-    user_email = user_login_request.user_email
-    password = user_login_request.password
+    user_collection   = db.get_collection("users")
+    report_collection = db.get_collection("reports")
 
-    user_operation_response = UserOperationResponse()
-    success = False
+    user = await user_collection.find_one({"email": user_login_request.user_email})
+    if not user or user["password"] != user_login_request.password:
+        return UserOperationResponse(
+            success=False,
+            message="Invalid user email or password",
+        )
 
-    user = await user_collection.find_one({"email": user_email})
-    if user and user["password"] == password:
-        success = True
-    else:
-        # user not found or password does not match
-        pass
+    # ── ONLY pull _id from each matching report ──────────────────────────────
+    cursor       = report_collection.find({"userId": str(user["_id"])})
+    reports_raw  = await cursor.to_list(length=None)
 
-    user_operation_response.success = success
-    user_operation_response.user_id = str(user["_id"]) if success else None
-    user_operation_response.message = "Login successful" if success else "Invalid user email or password"
-    return user_operation_response
+    history_list = [
+        {
+            "_id":      str(r.get("_id")),
+            "standard": str(r.get("standard", "")),
+            "goal": str(r.get("goal", "")),
+            "user_plan": str(r.get("user_plan", "")),
+            "action": str(r.get("action", "")),
+            "company": str(r.get("company", "")),
+        }
+        for r in reports_raw
+    ]
 
+    return UserOperationResponse(
+        success=True,
+        user_id=str(user["_id"]),
+        message="Login successful",
+        history_list=jsonable_encoder(history_list),
+    )
 
 @router.post(
     "/sign-up",

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import NavBar from "../NavBar/NavBar";
 
-const Login = () => {
+const Login = ({ onHistory }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   
@@ -23,6 +23,7 @@ const Login = () => {
       if (response.ok && data.success) {
         console.log("Login successful", data);
         sessionStorage.setItem("username", username);
+        onHistory(data.history_list); // 0503
         sessionStorage.setItem("user_id", data.user_id);
         navigate("/");
       } else {

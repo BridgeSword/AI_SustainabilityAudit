@@ -67,7 +67,7 @@ const RightPanel = ({ formData }) => {
       clearInterval(progressTimerRef.current);
     }
     const start = Date.now();
-    const total = 120000; 
+    const total = 10000; 
 
     progressTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - start;
