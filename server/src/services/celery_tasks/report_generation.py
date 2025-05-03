@@ -10,12 +10,9 @@ from ...agents.prompts import *
 logger = get_logger(__name__)
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_generating(cr_plan: CRPlanRequest, user_instructions: str, generated_plan: Dict) -> Union[None, Dict]:
- 
-    logger.info(f"start_generating called with cr_plan={cr_plan}, user_instructions={user_instructions}, generated_plan keys={list(generated_plan.keys())}")
+def start_generating(cr_plan_dict: dict, user_instructions: str, generated_plan: Dict) -> Union[None, Dict]:
 
-
-    cr_plan = CRPlanRequest(**cr_plan)
+    cr_plan = CRPlanRequest(**cr_plan_dict)
     logger.info("------------Executing Generation Process------------")
     logger.info("------------Creating All required Agents------------")
     

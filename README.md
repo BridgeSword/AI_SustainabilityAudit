@@ -1,51 +1,139 @@
-Frontend and Backend of MARAG
+# MARAG — Frontend and Backend Setup Guide
 
-## TODO:
+This repository contains the frontend and backend components for the **MARAG** project. The application includes a React-based frontend, a FastAPI-based backend, and supporting services managed via Docker.
 
-1. Modify plan
+---
 
-2. AI Edit
+## 🛠️ Build and Run Instructions
 
-3. History
+### 📦 Frontend
 
-## Build:
-#### Frontend:
-1. go to my-creat-app folder, `npm install`
+1. Navigate to the frontend directory:
 
-2. `npm run dev`
+   ```bash
+   cd my-react-app
+   ```
 
-#### Docker:
-1. `source .env`
+2. Install dependencies:
 
-2. `docker-compose -f docker-compose-sdmarag.yaml up -d`
+   ```bash
+   npm install
+   ```
 
-#### ollama:
-if using ollama
+3. Start the development server:
 
-1. `brew install Ollama/tap/ollama`
+   ```bash
+   npm run dev
+   ```
 
-2. `ollama pull llama3`
+---
 
-3. `ollama serve --host 0.0.0.0 --port 11434`
+### 🐳 Docker Services
 
-#### Backend:
-Make sure to install poetry and dependencies for the first time: 
-1. `curl -sSL https://install.python-poetry.org | python3 -`
-2. `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc`
-3. `source ~/.bashrc`
+1. Load environment variables:
 
-Run backend: (You can ignore warnings)
-1. `poetry run bash start.sh`
-## USE:
+   ```bash
+   source .env
+   ```
 
-#### UI
-visit http://localhost:5173/
+2. Start all services defined in the Docker Compose file:
 
-#### API
-visit http://localhost:9092/
+   ```bash
+   docker-compose -f docker-compose-sdmarag.yaml up -d
+   ```
 
-#### Track MongoDB
-1. Install and open the app "MongoDB Compass" (Download link: https://www.mongodb.com/products/tools/compass)
-2. Set URI: `mongodb://localhost:27017`
-3. Go to tab Advanced Connection Options-Authentication
-4. Username: `admin`, Password: `admin` (same as `MONGO_ROOT_USER` and `MONGO_ROOT_PASS` in `.env`)
+> **Note**: Ensure Docker and Docker Compose are installed and running on your system.
+
+---
+
+### 🤖 Ollama (Optional: If Using Local LLM Inference)
+
+If you are using [Ollama](https://ollama.com/) for local inference with LLaMA models:
+
+1. Install Ollama:
+
+   ```bash
+   brew install Ollama/tap/ollama
+   ```
+
+2. Download the desired model:
+
+   ```bash
+   ollama pull llama3
+   ```
+
+3. Start the Ollama server:
+
+   ```bash
+   ollama serve --host 0.0.0.0 --port 11434
+   ```
+
+---
+
+### 🧬 Backend
+
+#### One-Time Setup (First Use)
+
+Install [Poetry](https://python-poetry.org/docs/#installation):
+
+1. Install Poetry:
+
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
+
+2. Add Poetry to your shell’s PATH:
+
+   ```bash
+   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+#### Running the Backend
+
+Use Poetry to run the backend startup script:
+
+```bash
+poetry run bash start.sh
+```
+
+> ⚠️ Warnings during launch can typically be ignored unless they halt execution.
+
+---
+
+## 🚀 Usage
+
+### 🌐 Accessing the UI
+
+Once the frontend server is running, open your browser and go to:
+
+```
+http://localhost:5173/
+```
+
+### 🥪 Accessing the API
+
+The FastAPI backend will be available at:
+
+```
+http://localhost:9092/
+```
+
+---
+
+## 📊 Monitoring MongoDB
+
+To inspect the MongoDB instance used by the backend:
+
+1. Download and install [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
+2. Launch the application and connect using the following URI:
+
+   ```
+   mongodb://localhost:27017
+   ```
+3. Go to **Advanced Connection Options > Authentication**
+
+   * **Username**: `admin`
+   * **Password**: `admin`
+
+> These credentials correspond to `MONGO_ROOT_USER` and `MONGO_ROOT_PASS` in your `.env` file.
