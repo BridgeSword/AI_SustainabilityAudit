@@ -34,9 +34,8 @@ Make sure to install poetry and dependencies for the first time:
 2. `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc`
 3. `source ~/.bashrc`
 
-Run backend:
+Run backend: (You can ignore warnings)
 1. `poetry run bash start.sh`
-
 ## USE:
 
 #### UI
