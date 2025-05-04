@@ -25,4 +25,4 @@ class WSConnectionManager:
             try:
                 await connection.send_text(message)
             except:
-                self.disconnect(connection)
+                await self.disconnect_and_close(connection)

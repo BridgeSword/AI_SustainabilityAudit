@@ -8,7 +8,7 @@ poetry run uvicorn server.src.main:app \
     --host 0.0.0.0 \
     --port 9092 \
     --workers 1 \
-    --timeout-keep-alive 1000000 --reload & \
+    --timeout-keep-alive 1000000 & \
 celery -A server.src.main.celery_app worker \
     -l info --pool=threads & \
 celery -A server.src.main.celery_app flower

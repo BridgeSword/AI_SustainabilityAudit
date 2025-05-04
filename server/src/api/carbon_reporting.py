@@ -182,10 +182,12 @@ async def plan_report_ws(
 
                     section_ids = []
 
-                    for section_name, section_summary in generated_plan:
+                    logger.info("\n\nGenerated Plan: \n{}\n\n\n".format(generated_plan))
+
+                    for section_name, section_summary in generated_plan.items():
                         curr_section = SectionModel(
-                            name=section_name,
-                            initial_summary=section_summary
+                            name=str(section_name),
+                            initial_summary=str(section_summary)
                         )
 
                         curr_section = await section_collection.insert_one(
@@ -194,17 +196,13 @@ async def plan_report_ws(
 
                         section_ids.append(curr_section.inserted_id)
 
-                    report = await report_collection.find_one_and_update(
+                    await report_collection.find_one_and_update(
                         {"_id": report.inserted_id},
                         {
                             "$set": {
                                 "sectionIds": section_ids
                             }
                         }
-                    )
-
-                    report = await report_collection.find_one(
-                        {"_id": report.inserted_id}
                     )
 
                     await ws_manager.send_json_obj(
@@ -255,7 +253,7 @@ async def plan_report_ws(
                 whole_report = []
 
                 req_report = await report_collection.find_one(
-                    {"id": report.inserted_id}
+                    {"_id": report.inserted_id}
                 )
 
                 req_section_ids = req_report.get("sectionIds")
@@ -278,7 +276,7 @@ async def plan_report_ws(
 
                 whole_report = "\n\n".join(whole_report)
 
-                create_multipage_pdf(whole_report, f"carbon_report_{str(report.inserted_id)}")
+                create_multipage_pdf(whole_report, f"carbon_report_{str(report.inserted_id)}.pdf")
 
                 await ws_manager.send_json_obj(
                     CRPlanResponse(

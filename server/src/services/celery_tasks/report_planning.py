@@ -28,7 +28,10 @@ def start_thresholding(cr_plan: Dict, user_instructions: str) -> Union[None, int
 
     for _ in range(2):
         try:
-            agent_out = thresholder_agent(user_instructions, json_out=True)[0]
+            agent_out = thresholder_agent(user_instructions, json_out=True, store_history=False)
+            logger.info("###########################################################################################")
+            logger.info(agent_out)
+            agent_out = agent_out[0]
             req_threshold = int(min(max(1, int(agent_out["threshold"])), 5))
             break
         except Exception as e:
@@ -66,12 +69,17 @@ def start_planning(cr_plan: Dict, user_instructions: str, req_threshold: int) ->
         search_params={"metric_type": "L2"}, 
         output_fields=["text_chunk"]
     )
+    logger.info(results[0])
 
     context = ""
 
-    if len(results) > 0:
-        results = "\n".join([f"{i+1}. {chunk}" for i, chunk in enumerate(results)])
-        context = ADDITIONAL_CONTEXT.format(context = results)
+    relevant_ctx = []
+    for hits in results:
+        for idx, hit in enumerate(hits):
+            relevant_ctx.append(f"{idx + 1}. " + hit["entity"]["text_chunk"])
+
+    if len(relevant_ctx) > 0:
+        context = ADDITIONAL_CONTEXT.format(context="\n\n".join(relevant_ctx))
 
         logger.info("------------RETURNED CONTEXT------------")
         logger.info(context)

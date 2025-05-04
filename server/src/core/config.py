@@ -68,11 +68,11 @@ class Settings(BaseSettings):
     embedders: Embedders = Embedders()
 
     app_name: str = "Self-Decisive MARAG Backend API Server"
-    base_path: str = os.path.join(os.getcwd(), "src")
+    base_path: str = os.path.join(os.getcwd(), "server", "src")
 
     temp_files_path: str = os.path.join(os.getcwd(), "temp_files")
-    carbon_reports_path: str = os.path.join(os.getcwd(), "carbon_reports")
-    user_files_path: str = os.path.join(os.getcwd(), "user_files")
+    carbon_reports_path: str = os.path.join(base_path, "carbon_reports")
+    user_files_path: str = os.path.join(base_path, "user_files")
     
 
 settings = Settings()

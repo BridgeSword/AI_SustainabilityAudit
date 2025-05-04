@@ -209,10 +209,18 @@ async def ai_edits(
 
     context = ""
 
-    if len(results) > 0:
-        results = "\n".join([f"{i+1}. {chunk}" for i, chunk in enumerate(results)])
+    relevant_ctx = []
+    for hits in results:
+        for idx, hit in enumerate(hits):
+            relevant_ctx.append(f"{idx+1}. " + hit["entity"]["text_chunk"])
 
-        context = ADDITIONAL_CONTEXT.format(context = results)
+    if len(relevant_ctx) > 0:
+        context = ADDITIONAL_CONTEXT.format(context="\n\n".join(relevant_ctx))
+
+    # if len(results) > 0 and len(results[0]) > 0:
+    #     results = "\n\n".join([f"{i + 1}. {chunk["entity"]["text_chunk"]}" for i, chunk in enumerate(results[0])])
+    #
+    #     context = ADDITIONAL_CONTEXT.format(context = results)
 
     edit_instruction = context + "\n\n" + user_instructions + "\n\n" + latest_content
     edit_instruction = edit_instruction.strip()

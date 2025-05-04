@@ -16,14 +16,15 @@ def call_genaiapi(SYSTEM_PROMPT: str,
 
     genai_model = genai_model.lower()
 
-    if any([genai_model.startswith(_) for _ in Constants.CLOSEDSOURCE_MODELS.value + [Constants.OLLAMA.value]]):
+    if any([ genai_model.startswith(_) for _ in Constants.CLOSEDSOURCE_MODELS.value + Constants.OLLAMA.value ]):
         logger.info("Calling ClosedSource Models or Ollama!")
 
+        logger.info("######### " + genai_model + " #########")
         if "gemini" not in genai_model:
             genai_model = "-".join(genai_model.split("-")[1:])
 
         messages = [
-            {"role": "developer", "content": SYSTEM_PROMPT}
+            {"role": "system", "content": SYSTEM_PROMPT}
         ]
         
         messages.extend(CHATS)

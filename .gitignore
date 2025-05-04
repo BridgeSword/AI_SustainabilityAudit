@@ -172,6 +172,7 @@ test.py
 server/src/carbon_reports
 server/src/VS_files
 server/src/user_files
+user_files
 
 # Client-related
 

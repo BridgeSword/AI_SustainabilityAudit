@@ -45,6 +45,8 @@ def start_generating(cr_plan: Dict, user_instructions: str, generated_plan: Dict
 
         logger.info(f"Appending entry to multi_agents with section: {section} (detialed desc: {detailed_desc} with type: {type(detailed_desc)})")
 
+    logger.info(f"Total number of Multi Agents: {len(multi_agents)}")
+
     for idx, agent_dict in enumerate(multi_agents):
         agent = AgentBase(genai_model=cr_plan.get("genai_model"),
                           temperature=0.7,

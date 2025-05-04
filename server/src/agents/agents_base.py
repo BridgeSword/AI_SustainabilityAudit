@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Optional
 
 from openai import OpenAI
 
@@ -24,8 +24,8 @@ class AgentBase:
 
         self.tools = []
 
-        self.critiques: str = []
-        self.user_modification: str = None
+        self.critiques: list = []
+        self.user_modification: Optional[str, None] = None
 
         self.opensource_models = Constants.OPENSOURCE_MODELS.value
         self.closedsource_models = Constants.CLOSEDSOURCE_MODELS.value
@@ -42,15 +42,15 @@ class AgentBase:
             self.api_key = os.getenv("OPENAI_API_KEY")
 
         elif self.genai_model.startswith("gemini"):
-            self.base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            self.base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
             self.api_key=os.getenv("GEMINI_API_KEY")
 
         elif self.genai_model.startswith("claude"):
-            self.base_url="https://api.anthropic.com/v1/",
+            self.base_url="https://api.anthropic.com/v1/"
             self.api_key=os.getenv("CLAUDE_API_KEY")
 
         else:
-            self.base_url="http://localhost:11434/v1/",
+            self.base_url="http://localhost:11434/v1/"
             self.api_key="ollama"
 
         self.ai_client = OpenAI(
@@ -90,7 +90,7 @@ class AgentBase:
     def execute(self):
         response = None
 
-        if any([self.genai_model.startswith(_) for _ in self.closedsource_models + [Constants.OLLAMA.value]]):
+        if any([ self.genai_model.startswith(_) for _ in self.closedsource_models + Constants.OLLAMA.value ]):
             response = call_genaiapi(SYSTEM_PROMPT=self.system_message,
                                      CHATS=self.history,
                                      ai_client=self.ai_client,
