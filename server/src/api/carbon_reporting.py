@@ -6,6 +6,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from bson.objectid import ObjectId
 
+from dataclasses import asdict
+
 from ..core.utils import get_logger, create_multipage_pdf
 from ..core.schemas import *
 from ..core.config import GAIModels
@@ -133,7 +135,7 @@ async def plan_report_ws(
                     cr_plan_obj.genai_model = genai_model_variant
 
                     threshold_task = start_thresholding.apply_async(
-                        args=[cr_plan_obj, user_instructions]
+                        args=[asdict(cr_plan_obj), user_instructions]
                     )
 
                     while not threshold_task.ready():
@@ -159,7 +161,7 @@ async def plan_report_ws(
                         ).json(), websocket)
                     
                     planning_task = start_planning.apply_async(
-                        args=[cr_plan_obj, user_instructions, req_threshold]
+                        args=[asdict(cr_plan_obj), user_instructions, req_threshold]
                     )
 
                     while not planning_task.ready():
@@ -230,7 +232,7 @@ async def plan_report_ws(
                 
             elif current_status == WebsocketStatus.generate.value:
                 report_gen_task = start_generating.apply_async(
-                    args=[cr_plan_obj, user_instructions, generated_plan, context]
+                    args=[asdict(cr_plan_obj), user_instructions, generated_plan, context]
                 )
 
                 while not report_gen_task.ready():

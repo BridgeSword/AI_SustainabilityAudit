@@ -84,7 +84,7 @@ class AIEditsResponse(BaseModel):
 
 class ComputeDocumentEmbeddingsRequest(BaseModel):
     docs_path: str
-    embedding_model: str
+    embedding_model: str = Field(default=None)
     device: str = Field(default="cpu", validate_default=True)
     chunk_size: int = Field(default=256, validate_default=True)
 

@@ -7,23 +7,22 @@ from sentence_transformers import SentenceTransformer
 
 from ...main import celery_app, milvus_client
 from ...core.utils import get_logger
-from ...core.schemas import CRPlanRequest
 from ...core.config import settings, GAIEmbeddersCollections
-from ...agents import Tool, AgentBase
+from ...agents import AgentBase
 from ...agents.prompts import *
 
 
 logger = get_logger(__name__)
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_thresholding(cr_plan: CRPlanRequest, user_instructions: str) -> Union[None, int]:
+def start_thresholding(cr_plan: Dict, user_instructions: str) -> Union[None, int]:
     logger.info("------------Executing Thresholder Agent------------")
 
     logger.info("Started deciding the threshold no. of loops required to complete the planning!")
 
-    thresholder_agent = AgentBase(genai_model=cr_plan.genai_model,
+    thresholder_agent = AgentBase(genai_model=cr_plan.get("genai_model"),
                                   temperature=0.7,
-                                  device=cr_plan.device,
+                                  device=cr_plan.get("device"),
                                   system_message=SYSTEM_PROMPT_THRESHOLDER)
     req_threshold = None
 
@@ -43,7 +42,7 @@ def start_thresholding(cr_plan: CRPlanRequest, user_instructions: str) -> Union[
 
 
 @celery_app.task(ignore_result=False, track_started=True)
-def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold: int) -> Union[None, Dict]:
+def start_planning(cr_plan: Dict, user_instructions: str, req_threshold: int) -> Union[None, tuple]:
     logger.info("------------Executing Planner Process------------")
 
     embedding_model = "stella_15"
@@ -77,14 +76,14 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
         logger.info("------------RETURNED CONTEXT------------")
         logger.info(context)
 
-    planner_agent = AgentBase(genai_model=cr_plan.genai_model,
+    planner_agent = AgentBase(genai_model=cr_plan.get("genai_model"),
                               temperature=0.7,
-                              device=cr_plan.device,
+                              device=cr_plan.get("device"),
                               system_message=SYSTEM_PROMPT_PLANNING)
     
-    evaluation_agent = AgentBase(genai_model=cr_plan.genai_model,
+    evaluation_agent = AgentBase(genai_model=cr_plan.get("genai_model"),
                                  temperature=0.7,
-                                 device=cr_plan.device,
+                                 device=cr_plan.get("device"),
                                  system_message=SYSTEM_PROMPT_PLAN_EVALUATION)
 
     plan_instruction = context + "\n\n" + user_instructions

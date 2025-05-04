@@ -84,6 +84,7 @@ const MidPanel = ({ onGenerate }) => {
 
     onGenerate({ reportName, standard, carboGoal, carbonPlan, carbonAction });
   };
+
   const autoResize = (e) => {
     e.target.style.height = "auto";
     e.target.style.height = `${e.target.scrollHeight}px`;
@@ -118,10 +119,12 @@ const MidPanel = ({ onGenerate }) => {
             onChange={(e) => setStandard(e.target.value)}
             className="full-width"
           >
-            <option value="iso">iso</option>
-            <option value="CSRD">CSRD</option>
+            <option value="GHG">GHG</option>
+            <option value="ISO">ISO</option>
+            <option value="CDP">CDP</option>
+            <option value="SBTI">SBTI</option>
             <option value="TCFD">TCFD</option>
-            <option value="ISSB">ISSB</option>
+            <option value="CDSB">CDSB</option>
           </select>
         </div>
 

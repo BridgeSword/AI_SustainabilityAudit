@@ -49,9 +49,9 @@ const RightPanel = ({ formData }) => {
         goal: formData.carboGoal,
         plan: formData.carbonPlan,
         action: formData.carbonAction,
-        company: "GreenEarth",
+        company: "Cornell University",
         device: "cpu",
-        genai_model: "ollama-llama3"
+        genai_model: "ollama-llama3.2"
       })
     );
 
