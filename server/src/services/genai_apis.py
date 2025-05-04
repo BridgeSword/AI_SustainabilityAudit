@@ -1,27 +1,26 @@
 from openai import OpenAI
 
-import google.generativeai as genai
-
-from typing import Union, List, Dict
+from typing import List, Dict
 
 from ..core.utils import get_logger
-# from ..core.config import GAIModelMapping
+from ..core.constants import Constants
 
 
 logger = get_logger(__name__)
 
 def call_genaiapi(SYSTEM_PROMPT: str, 
                   CHATS: List[Dict],
-                  ai_client: Union[genai, OpenAI],  # type: ignore
+                  ai_client: OpenAI,
                   temp: float=0.7, 
                   genai_model: str="openai"):
 
     genai_model = genai_model.lower()
 
-    if genai_model.startswith("openai"):
-        logger.info("Calling OpenAI API")
+    if any([genai_model.startswith(_) for _ in Constants.CLOSEDSOURCE_MODELS.value + [Constants.OLLAMA.value]]):
+        logger.info("Calling ClosedSource Models or Ollama!")
 
-        genai_model = "-".join(genai_model.split("-")[1:])
+        if "gemini" not in genai_model:
+            genai_model = "-".join(genai_model.split("-")[1:])
 
         messages = [
             {"role": "developer", "content": SYSTEM_PROMPT}
@@ -36,20 +35,6 @@ def call_genaiapi(SYSTEM_PROMPT: str,
         )
 
         return response.choices[0].message.content
-    
-    elif genai_model.startswith("gemini"):
-        logger.info("Calling Google GenAI API")
-        
-        model = ai_client.GenerativeModel(genai_model, 
-                                          system_instruction=SYSTEM_PROMPT)
-        prev_chat = model.start_chat(
-                        history=CHATS[-1], 
-                        generation_config=genai.types.GenerationConfig(candidate_count=1, temperature=temp)
-                    )
-        
-        response = prev_chat.send_message(CHATS[-1]["parts"])
-        
-        return response.text
     
     else:
         raise ValueError("Invalid API Spec")

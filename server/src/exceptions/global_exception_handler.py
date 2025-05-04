@@ -1,5 +1,3 @@
-import json
-
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError

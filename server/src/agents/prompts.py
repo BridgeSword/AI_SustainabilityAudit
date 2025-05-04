@@ -136,7 +136,7 @@ Finally, to better guide your thought process, you can use some of the user prov
 """
 
 ADD_SECTION_CONTEXT = """
-\nBelow are the section name and section description. Use them to generate a detailed and accurate description of the section while also generating the required subheadings and bullet points as needed. However, please note that you SHOULD NOT generate any subheadings or bullet points if the section is about the introduction or conclusion.
+\nBelow are the section name and section description. Use them to generate a detailed and accurate description of the section while also generating the required subheadings and bullet points as needed. However, please note that you SHOULD NOT generate any subheadings or bullet points if the section is about the "introduction" or "conclusion".
 
 ============================================
 Section Name:

@@ -4,7 +4,9 @@ from typing import Any
 from openai import OpenAI
 
 from ..services.genai_apis import call_genaiapi#, call_hf_model
+
 from ..core.utils import get_logger, extract_json
+from ..core.constants import Constants
 
 
 logger = get_logger(__name__)
@@ -15,7 +17,7 @@ class AgentBase:
                  temperature: float, 
                  device: str=None, 
                  system_message: str=None):
-        self.genai_model = genai_model
+        self.genai_model = genai_model.lower()
         
         self.history: list = []
         self.system_message: str = system_message
@@ -25,8 +27,8 @@ class AgentBase:
         self.critiques: str = []
         self.user_modification: str = None
 
-        self.opensource_models = ["deepseek", "llama"]
-        self.closedsource_models = ["openai", "gemini", "claude"]
+        self.opensource_models = Constants.OPENSOURCE_MODELS.value
+        self.closedsource_models = Constants.CLOSEDSOURCE_MODELS.value
 
         self.temperature = temperature
 
@@ -86,7 +88,7 @@ class AgentBase:
 
 
     def execute(self):
-        if any([self.genai_model.startswith(_) for _ in self.closedsource_models]):
+        if any([self.genai_model.startswith(_) for _ in self.closedsource_models + [Constants.OLLAMA.value]]):
             response = call_genaiapi(SYSTEM_PROMPT=self.system_message, 
                                      CHATS=self.history, 
                                      ai_client=self.ai_client, 

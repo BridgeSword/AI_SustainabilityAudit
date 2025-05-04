@@ -21,11 +21,11 @@ class CarbonReportPlanRequest(BaseModel):
 
 @dataclass
 class CRPlanRequest:
-    standard: str = field(default_factory=str)
-    goal: str = field(default_factory=str)
-    plan: str = field(default_factory=str)
-    action: str = field(default_factory=str)
-    company: str = field(default_factory=str)
+    standard: str = field(default=None)
+    goal: str = field(default=None)
+    plan: str = field(default=None)
+    action: str = field(default=None)
+    company: str = field(default=None)
     genai_model: str = field(default="openai-gpt-4o")
     device: str = field(default="cpu")
     

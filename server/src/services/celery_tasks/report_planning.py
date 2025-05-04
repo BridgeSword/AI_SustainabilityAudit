@@ -30,13 +30,11 @@ def start_thresholding(cr_plan: CRPlanRequest, user_instructions: str) -> Union[
     for _ in range(2):
         try:
             agent_out = thresholder_agent(user_instructions, json_out=True)[0]
-
-            req_threshold = int(min(max(1, agent_out["threshold"]), 5))
-            
+            req_threshold = int(min(max(1, int(agent_out["threshold"])), 5))
             break
-        except:
+        except Exception as e:
+            logger.warning(f"------------\nRetrying again as Thresholding failed due to error: {e}\n------------")
             thresholder_agent.clear_history()
-            logger.info("------------Unable to find the threshold value, trying again...------------")
 
     if not req_threshold:
         return None
@@ -73,8 +71,10 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
 
     if len(results) > 0:
         results = "\n".join([f"{i+1}. {chunk}" for i, chunk in enumerate(results)])
-
         context = ADDITIONAL_CONTEXT.format(context = results)
+        
+        logger.info("------------RETURNED CONTEXT------------")
+        logger.info(context)
 
     planner_agent = AgentBase(genai_model=cr_plan.genai_model, 
                               temperature=0.7, 
@@ -110,7 +110,8 @@ def start_planning(cr_plan: CRPlanRequest, user_instructions: str, req_threshold
             
             if generated_plan is not None:
                 break
-        except:
+        except Exception as e:
+            logger.warning(f"------------\nRetrying again as Planning failed due to error: {e}\n------------")
             planner_agent.clear_history()
             evaluation_agent.clear_history()
             continue

@@ -1,4 +1,3 @@
-import time
 import asyncio
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
@@ -54,9 +53,11 @@ async def plan_report_ws(
 
     current_status = WebsocketStatus.plan.value
 
-    # need to change with actual user_id later
+    # need to change with actual user_id later when the login functionality is implemented
     user_id = ObjectId()
     report = None
+
+    context = ""
 
     try:
         while True:
@@ -104,13 +105,30 @@ async def plan_report_ws(
                                 task_status = Status.failed.value,
                                 error = "No GenAI Model specified or the variant is not supported!"
                             ).json(), websocket)
-
                         await ws_manager.disconnect_and_close(websocket)
-                        
                         break
 
                     genai_models = GAIModels.mapping().get(gai_model[0], None)
+                    
+                    if not genai_models:
+                        await ws_manager.send_json_obj(
+                            CRPlanResponse(
+                                task_status=Status.failed.value,
+                                error=f"Unknown GenAI model type: {gai_model[0]}"
+                            ).json(), websocket)
+                        await ws_manager.disconnect_and_close(websocket)
+                        break
+                    
                     genai_model_variant = genai_models.get("-".join(gai_model[1:]), None)
+
+                    if not genai_model_variant:
+                        await ws_manager.send_json_obj(
+                            CRPlanResponse(
+                                task_status=Status.failed.value,
+                                error=f"Unknown GenAI model variant: {gai_model[1]}"
+                            ).json(), websocket)
+                        await ws_manager.disconnect_and_close(websocket)
+                        break
 
                     cr_plan_obj.genai_model = genai_model_variant
 
@@ -228,7 +246,6 @@ async def plan_report_ws(
                         ).json(), websocket)
 
                     await ws_manager.disconnect_and_close(websocket)
-                        
                     break
 
                 report_response = {}

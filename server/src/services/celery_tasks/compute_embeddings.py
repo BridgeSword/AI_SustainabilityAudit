@@ -111,7 +111,16 @@ def start_computing(docs_path: Union[str, list],
                     text = page.get_text()
                     text_list.append(text)
 
-                sent_tokenized_text = sent_tokenize(" ".join(text_list))
+                full_text = " ".join(text_list).strip()
+
+                if not full_text:
+                    logger.warning(f"No text extracted from {doc_path}, skipping.")
+                    continue
+
+                sent_tokenized_text = sent_tokenize(full_text)
+                
+                if not sent_tokenized_text:
+                    sent_tokenized_text = [full_text]
 
                 emb_inps = emb_tokenizer(sent_tokenized_text, **settings.embedders.default_emb_params)
 

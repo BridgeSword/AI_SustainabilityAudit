@@ -158,6 +158,9 @@ class GAIModels(Enum):
         "8B": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     }
 
+    ollama: Dict[str, str] = {
+        "llama3.2": "ollama-llama3.2"
+    }
     
     @staticmethod
     def mapping() -> Dict:

@@ -55,9 +55,9 @@ def get_hash(file_path):
 
 
 def get_device(req_device: str = None):
-    if req_device.lower().strip() == "cuda" and torch.cuda.is_available():
+    if req_device is not None and req_device.lower().strip() == "cuda" and torch.cuda.is_available():
         return "cuda"
-    elif req_device.lower().strip() == "mps" and torch.mps.is_available():
+    elif req_device is not None and req_device.lower().strip() == "mps" and torch.mps.is_available():
         return "mps"
     else:
         logger.info("No CUDA or MPS found! Using CPU instead!")
