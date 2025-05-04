@@ -1,13 +1,13 @@
 
 .mid-panel {
-    width: 40vw;
-    margin-left:1vw;
-    padding: 2rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-  
+  width: 40vw;
+  margin-left:1vw;
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
 
   .mid-panel-header {
     text-align: left;
@@ -160,12 +160,12 @@
     gap: 10px;
     flex-grow: 1;
   }
-  
+
   .file-icon {
     width: 24px;
     height: 24px;
   }
-  
+
   .file-name {
     font-size: 0.9rem;
     color: #525151;

@@ -19,15 +19,16 @@ class CarbonReportPlanRequest(BaseModel):
         return device or "cpu"
     
 
-class CRPlanRequest(BaseModel):
-    standard: str = ""
-    goal: str = ""
-    plan: str = ""
-    action: str = ""
-    company: str = ""
-    genai_model: str = "openai-gpt-4o"
-    device: str = "cpu"
-    
+@dataclass
+class CRPlanRequest:
+    standard: str = field(default=None)
+    goal: str = field(default=None)
+    plan: str = field(default=None)
+    action: str = field(default=None)
+    company: str = field(default=None)
+    genai_model: str = field(default="openai-gpt-4o")
+    device: str = field(default="cpu")
+
 
 @dataclass
 class CRPlanResponse:
@@ -56,6 +57,29 @@ class CarbonReportGenRequest(BaseModel):
 class CarbonReportGenResponse(BaseModel):
     report_path: str = Field(default=None)
     report_status: str = Field(default=None)
+
+
+class ManualEditsRequest(BaseModel):
+    section_id: str
+    user_edit: str
+
+
+class GenericResponse(BaseModel):
+    response: str
+    status: str
+
+
+class AIEditsRequest(BaseModel):
+    report_id: str
+    section_id: str
+    user_request: str
+    genai_model: str = Field(default=None)
+    device: str = Field(default=None)
+
+
+class AIEditsResponse(BaseModel):
+    section_id: str
+    modified_section: str
 
 
 class ComputeDocumentEmbeddingsRequest(BaseModel):

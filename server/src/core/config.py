@@ -157,10 +157,9 @@ class GAIModels(Enum):
         "7B": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
         "8B": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     }
+
     ollama: Dict[str, str] = {
-        "llama3": "llama3",
-        "llama3.2": "llama3.2",
-        "phi3": "phi3"
+        "llama3.2": "ollama-llama3.2"
     }
     
     @staticmethod

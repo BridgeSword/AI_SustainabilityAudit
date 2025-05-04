@@ -1,10 +1,10 @@
 import os
-from typing import Annotated, List
+from typing import List
+
 import torch
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
-from fastapi import File, UploadFile, HTTPException
 
 from celery.result import AsyncResult
 
@@ -16,7 +16,7 @@ from ..core.schemas import ComputeDocumentEmbeddingsRequest, GetEmbeddingRequest
 
 from ..services.celery_tasks.compute_embeddings import start_computing
 
-from ..extension import milvus_client
+from ..main import milvus_client
 
 
 logger = get_logger(__name__)
@@ -79,7 +79,7 @@ async def upload_file(files: List[UploadFile] = File(...)):
     return JSONResponse(content={
         "task_id": emb_task.id, 
         "status": "Uploaded and started embedding"
-        })
+    })
 
 
 @router.get("/status/{task_id}", tags=["Document Embeddings"])

@@ -2,10 +2,12 @@ import os
 from typing import Any
 
 from openai import OpenAI
-import google.generativeai as genai
-from ..services.genai_apis import call_genaiapi
+
+from ..services.genai_apis import call_genaiapi#, call_hf_model
+
 from ..core.utils import get_logger, extract_json
-import requests
+from ..core.constants import Constants
+
 
 logger = get_logger(__name__)
 
@@ -15,8 +17,8 @@ class AgentBase:
                  temperature: float, 
                  device: str=None, 
                  system_message: str=None):
-        self.genai_model = genai_model
-        
+        self.genai_model = genai_model.lower()
+
         self.history: list = []
         self.system_message: str = system_message
 
@@ -25,8 +27,8 @@ class AgentBase:
         self.critiques: str = []
         self.user_modification: str = None
 
-        self.opensource_models = ["deepseek", "llama"]
-        self.closedsource_models = ["openai", "gemini", "claude"]
+        self.opensource_models = Constants.OPENSOURCE_MODELS.value
+        self.closedsource_models = Constants.CLOSEDSOURCE_MODELS.value
 
         self.temperature = temperature
 
@@ -35,28 +37,26 @@ class AgentBase:
         self.base_url = None
         self.api_key = None
 
-        self.ai_client = None
-
         if self.genai_model.startswith("openai"):
             self.base_url = "https://api.openai.com/v1/"
             self.api_key = os.getenv("OPENAI_API_KEY")
-            self.ai_client = OpenAI(
-                base_url=self.base_url,
-                api_key=self.api_key
-            )
 
         elif self.genai_model.startswith("gemini"):
-            self.api_key = os.getenv("GEMINI_API_KEY")
-            genai.configure(api_key=self.api_key)
-            self.ai_client = genai.GenerativeModel(self.genai_model.split("-", 1)[-1])
+            self.base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            self.api_key=os.getenv("GEMINI_API_KEY")
 
         elif self.genai_model.startswith("claude"):
-            self.base_url = "https://api.anthropic.com/v1/"
-            self.api_key = os.getenv("CLAUDE_API_KEY")
+            self.base_url="https://api.anthropic.com/v1/",
+            self.api_key=os.getenv("CLAUDE_API_KEY")
 
         else:
-            self.base_url = "http://localhost:11434/v1/"
-            self.api_key = "ollama"
+            self.base_url="http://localhost:11434/v1/",
+            self.api_key="ollama"
+
+        self.ai_client = OpenAI(
+            base_url=self.base_url,
+            api_key=self.api_key
+        )
 
 
     def set_system_message(self, sys_msg):
@@ -88,55 +88,17 @@ class AgentBase:
 
 
     def execute(self):
-        if self.genai_model.startswith("gemini"):
-            try:
-                genai.configure(api_key=self.api_key)
-                model_name = self.genai_model.split("-")[1]  
-                model = genai.GenerativeModel(model_name)
+        response = None
 
-            
-                prompt = self.system_message + "\n\n" if self.system_message else ""
-                for msg in self.history:
-                    prompt += f"{msg['role'].capitalize()}: {msg['content']}\n"
-                prompt += "Assistant:"
+        if any([self.genai_model.startswith(_) for _ in self.closedsource_models + [Constants.OLLAMA.value]]):
+            response = call_genaiapi(SYSTEM_PROMPT=self.system_message,
+                                     CHATS=self.history,
+                                     ai_client=self.ai_client,
+                                     temp=self.temperature,
+                                     genai_model=self.genai_model)
+        else:
+            # TODO: Implement calling the HuggingFace API from here by passing in all the required Chat Parameters
+            # response = call_hf_model(self.genai_model, self.history)
+            pass
 
-                response = model.generate_content(prompt)
-                return response.text
-
-            except Exception as e:
-                logger.warning(f"Gemini generation failed: {e}")
-                return "Error during Gemini generation."
-
-        elif self.genai_model.startswith("openai"):
-            return call_genaiapi(SYSTEM_PROMPT=self.system_message, 
-                                 CHATS=self.history, 
-                                 ai_client=self.ai_client, 
-                                 temp=self.temperature, 
-                                 genai_model=self.genai_model)
-                
-        elif self.genai_model.startswith("ollama"):
-            try:
-                prompt = self.system_message + "\n\n" if self.system_message else ""
-                for msg in self.history:
-                    prompt += f"{msg['role'].capitalize()}: {msg['content']}\n"
-                prompt += "Assistant:"
-
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": self.genai_model.split("-")[-1],
-                        "prompt": prompt,
-                        "stream": False
-                    },
-                    timeout=None
-                )
-
-                try:
-                    return response.json().get("response", "").strip()
-                except Exception:
-                    return response.text.strip()
-
-
-            except Exception as e:
-                logger.warning(f"Ollama generation failed: {e}")
-                return "Error during Ollama generation."
+        return response

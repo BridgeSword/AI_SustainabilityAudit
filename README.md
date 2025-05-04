@@ -1,4 +1,4 @@
-# MARAG — Frontend and Backend Setup Guide
+# SMARAG (Self-decisive Multi-Agentic Retrieval Augmented Generation) — Frontend and Backend Setup Guide
 
 This repository contains the frontend and backend components for the **MARAG** project. The application includes a React-based frontend, a FastAPI-based backend, and supporting services managed via Docker.
 

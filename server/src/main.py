@@ -1,23 +1,26 @@
+import os
 import ssl
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
+
+from pymilvus import MilvusClient
 
 from motor import motor_asyncio
-import os
+
+from celery import Celery
+
+from dotenv import load_dotenv
+
 from .core.config import settings
 from .core.utils import get_logger
 from .core.event_handlers import start_app_handler
+
 from .exceptions.global_exception_handler import catch_global_exceptions, validation_exception_handler
 
-from .api import checks, carbon_reporting, embeddings, login
-from .api.carbon_reporting import router as carbon_ws_router
-
-from .extension import celery_app, milvus_client, core_db
 
 load_dotenv()
-
 
 try:
     _create_unverified_https_context = ssl._create_unverified_context
@@ -28,14 +31,42 @@ else:
 
 logger = get_logger(__name__)
 
+# ——— Milvus setup ———
+milvus_client = MilvusClient(
+    uri=os.getenv("MILVUS_URI"),
+    token=os.getenv("MILVUS_TOKEN"),
+)
+
+# ——— MongoDB setup ———
+MONGO_URL = f"mongodb://{os.getenv('MONGO_ROOT_USER')}:{os.getenv('MONGO_ROOT_PASS')}@{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_CORE_DB')}?retryWrites=true&w=majority"
+
+mongo_client = motor_asyncio.AsyncIOMotorClient(MONGO_URL)
+core_db = mongo_client.get_database(os.getenv('MONGO_CORE_DB'))
+
+def get_mongo_client():
+     return core_db
+
+# ——— Celery setup ———
+celery_app = Celery("smarag-celery",
+                    broker=os.getenv("CELERY_BROKER"),
+                    backend=os.getenv("CELERY_BACKEND"),
+                    broker_connection_retry_on_startup=True
+                    )
+
+
+from .api import checks, carbon_reporting, embeddings, edits, login
 
 app = FastAPI(title=settings.app_name, docs_url="/")
 
-origins = ["*"]
+origins = [
+    # To be modified to support only the acceptable URLs later
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,  
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -45,15 +76,14 @@ app.middleware("http")(catch_global_exceptions)
 app.include_router(checks.router)
 app.include_router(embeddings.router, prefix="/embeddings/v1")
 app.include_router(carbon_reporting.router, prefix="/sdmarag/v1")
-app.include_router(carbon_ws_router)
+app.include_router(edits.router, prefix="/edits/v1")
 app.include_router(login.router)
 
 app.add_event_handler("startup", start_app_handler(app, milvus_client))
-
 
 app.exception_handler(validation_exception_handler)
 
 
 @app.get("/")
 def root():
-    return JSONResponse(content={"detail": settings.app_name, "status": 200})
+	return JSONResponse(content={"detail": settings.app_name, "status": 200})

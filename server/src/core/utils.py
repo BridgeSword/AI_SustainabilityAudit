@@ -3,8 +3,11 @@ import json
 import logging
 import hashlib
 
-from markdown_pdf import MarkdownPdf, Section
 import torch
+
+from markdown_pdf import MarkdownPdf, Section
+
+from ..core.config import settings
 
 
 def get_logger(scope):
@@ -14,6 +17,13 @@ def get_logger(scope):
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
 
     return logger
 
@@ -45,9 +55,9 @@ def get_hash(file_path):
 
 
 def get_device(req_device: str = None):
-    if req_device.lower().strip() == "cuda" and torch.cuda.is_available():
+    if req_device is not None and req_device.lower().strip() == "cuda" and torch.cuda.is_available():
         return "cuda"
-    elif req_device.lower().strip() == "mps" and torch.mps.is_available():
+    elif req_device is not None and req_device.lower().strip() == "mps" and torch.mps.is_available():
         return "mps"
     else:
         logger.info("No CUDA or MPS found! Using CPU instead!")
@@ -83,17 +93,8 @@ def extract_json(s, index=0):
 def thresolder(curr_val, max_val):
     return min(curr_val, max_val)
 
-def RawJSONDecoder(index):
-    class _RawJSONDecoder(json.JSONDecoder):
-        end = None
-
-        def decode(self, s, *_):
-            data, self.__class__.end = self.raw_decode(s, index)
-            return data
-    return _RawJSONDecoder
-
 def create_multipage_pdf(text, filename="output.pdf"):
     pdf = MarkdownPdf()
 
     pdf.add_section(Section(text.strip(), toc=False))
-    pdf.save(filename)
+    pdf.save(os.path.join(settings.carbon_reports_path, filename))

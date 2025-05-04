@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 
 from nltk import sent_tokenize
 
-from ...extension import celery_app, milvus_client
+from ...main import celery_app, milvus_client
 from ...core.utils import get_logger, clear_torch_cache
 from ...core.config import settings, GAIEmbeddersCollections, settings
 
@@ -112,18 +112,17 @@ def start_computing(docs_path: Union[str, list],
                     text_list.append(text)
 
                 full_text = " ".join(text_list).strip()
+
                 if not full_text:
                     logger.warning(f"No text extracted from {doc_path}, skipping.")
                     continue
 
                 sent_tokenized_text = sent_tokenize(full_text)
+
                 if not sent_tokenized_text:
                     sent_tokenized_text = [full_text]
 
-                emb_inps = emb_tokenizer(
-                    sent_tokenized_text,
-                    **settings.embedders.default_emb_params
-                )
+                emb_inps = emb_tokenizer(sent_tokenized_text, **settings.embedders.default_emb_params)
 
                 emb_chunks = compute_chunks(emb_inps, 
                                             sent_tokenized_text, 
@@ -136,9 +135,9 @@ def start_computing(docs_path: Union[str, list],
 
                 emb_chunks_joined = [" ".join(i) for i in emb_chunks]
                 
-                computed_embeddings = embedder.encode(emb_chunks_joined, 
-                                                    show_progress_bar="tqdm", 
-                                                    device=device)
+                computed_embeddings = embedder.encode(emb_chunks_joined,
+                                                      show_progress_bar="tqdm",
+                                                      device=device)
                 
                 vector_col_name = GAIEmbeddersCollections.mapping()[embedding_model]
 

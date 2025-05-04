@@ -17,10 +17,10 @@ const MidPanel = ({ onGenerate }) => {
 
    const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
-    
+
     // Filter for only PDF files
     const pdfFiles = files.filter(file => validatePdfFile(file));
-    
+
     if (pdfFiles.length > 0) {
       setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
     } else if (files.length > 0) {
@@ -36,12 +36,12 @@ const MidPanel = ({ onGenerate }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const files = Array.from(e.dataTransfer.files);
-    
+
     // Filter for only PDF files
     const pdfFiles = files.filter(file => validatePdfFile(file));
-    
+
     if (pdfFiles.length > 0) {
       setSelectedFiles(prevFiles => [...prevFiles, ...pdfFiles]);
     } else if (files.length > 0) {
@@ -145,7 +145,7 @@ const MidPanel = ({ onGenerate }) => {
               multiple
             />
           </label>
-          
+
           {selectedFiles.length > 0 && (
             <div className="files-list">
               {selectedFiles.map((file, index) => (
