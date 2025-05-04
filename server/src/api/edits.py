@@ -28,8 +28,7 @@ router = APIRouter()
 @router.post(
     "/manual",
     tags=["PDF Edit Requests"],
-    description="Use this API to save the Manual Edits by the user to the database"
-)
+    description="Use this API to save the Manual Edits by the user to the database")
 async def manual_edits(
     manual_edit_request: ManualEditsRequest,
     db: AsyncIOMotorDatabase = Depends(get_mongo_client)
@@ -122,7 +121,20 @@ async def ai_edits(
         )
 
     genai_models = GAIModels.mapping().get(gai_model[0], None)
+
+    if not genai_models:
+        return GenericResponse(
+            response=f"Unknown GenAI model type: {gai_model[0]}",
+            status=Status.failed.value
+        )
+
     genai_model_variant = genai_models.get("-".join(gai_model[1:]), None)
+
+    if not genai_model_variant:
+        return GenericResponse(
+            response=f"Unknown GenAI model variant: {"-".join(gai_model[1:])}",
+            status=Status.failed.value
+        )
 
     if not section_id or not user_request:
         return GenericResponse(

@@ -11,7 +11,7 @@ This repository contains the frontend and backend components for the **MARAG** p
 1. Navigate to the frontend directory:
 
    ```bash
-   cd my-react-app
+   cd client
    ```
 
 2. Install dependencies:

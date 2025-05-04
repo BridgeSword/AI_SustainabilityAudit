@@ -18,7 +18,7 @@ from ..ws.manager import WSConnectionManager
 
 from ..agents.prompts import USER_INSTRUCTIONS
 
-from ..main import core_db as db, get_mongo_client
+from ..main import get_mongo_client
 
 from ..db.mongo.report import ReportModel
 from ..db.mongo.section import SectionModel
@@ -125,7 +125,7 @@ async def plan_report_ws(
                         await ws_manager.send_json_obj(
                             CRPlanResponse(
                                 task_status=Status.failed.value,
-                                error=f"Unknown GenAI model variant: {gai_model[1]}"
+                                error=f"Unknown GenAI model variant: {"-".join(gai_model[1:])}"
                             ).json(), websocket)
                         await ws_manager.disconnect_and_close(websocket)
                         break

@@ -1,12 +1,12 @@
-import asyncio
-
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from ..core.constants import Status
 from ..core.utils import get_logger
-from ..core.schemas import UserLoginRequest, UserSignUpRequest, UserChangePwdRequest, UserDeleteAccountRequest
+from ..core.schemas import UserLoginRequest, UserSignUpRequest, UserChangePwdRequest, UserDeleteAccountRequest, \
+    GenericResponse
 from ..core.schemas import UserOperationResponse
-from server.src.extension import  core_db  as db, get_mongo_client
+from ..main import get_mongo_client
 
 
 from ..db.mongo.user import UserModel
@@ -16,10 +16,15 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-user_collection = db.get_collection("users")
-
-@router.post("/login", tags=["User Operations"], response_model=UserOperationResponse)
-async def login(user_login_request: UserLoginRequest):
+@router.post(
+    "/login",
+    tags=["User Operations"],
+    response_model=UserOperationResponse)
+async def login(
+        user_login_request: UserLoginRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+):
+    user_collection = db.get_collection("users")
     user_email = user_login_request.user_email
     password = user_login_request.password
 
@@ -39,8 +44,15 @@ async def login(user_login_request: UserLoginRequest):
     return user_operation_response
 
 
-@router.post("/sign-up", tags=["User Operations"], response_model=UserOperationResponse)
-async def signup(user_sign_up_request: UserSignUpRequest):
+@router.post(
+    "/sign-up",
+    tags=["User Operations"],
+    response_model=UserOperationResponse)
+async def signup(
+        user_sign_up_request: UserSignUpRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+):
+    user_collection = db.get_collection("users")
     user_info = UserModel(
         email=user_sign_up_request.user_email,
         password=user_sign_up_request.password
@@ -50,6 +62,8 @@ async def signup(user_sign_up_request: UserSignUpRequest):
     success = False
     message = ""
 
+    result = None
+
     user = await user_collection.find_one({"email": user_sign_up_request.user_email})
     if user:
         success = False
@@ -58,6 +72,12 @@ async def signup(user_sign_up_request: UserSignUpRequest):
       result = await user_collection.insert_one(user_info.model_dump(by_alias=True, exclude=["id"]))
       message = "User created successfully"
       success = True
+
+    if not result:
+        return GenericResponse(
+            response="Unable to sign up",
+            status=Status.failed.value
+        )
     
     user_operation_response.success = success
     user_operation_response.user_id = str(result.inserted_id) if success else None
@@ -65,8 +85,15 @@ async def signup(user_sign_up_request: UserSignUpRequest):
     return user_operation_response
 
 
-@router.post("/change-pwd", tags=["User Operations"], response_model=UserOperationResponse)
-async def change_pwd(user_change_pwd_request: UserChangePwdRequest):
+@router.post(
+    "/change-pwd",
+    tags=["User Operations"],
+    response_model=UserOperationResponse)
+async def change_pwd(
+        user_change_pwd_request: UserChangePwdRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+):
+    user_collection = db.get_collection("users")
     user_email = user_change_pwd_request.user_email
     old_password = user_change_pwd_request.old_password
     new_password = user_change_pwd_request.new_password
@@ -91,7 +118,11 @@ async def change_pwd(user_change_pwd_request: UserChangePwdRequest):
 
 
 @router.post("/delete-account", tags=["User Operations"])
-async def delete_account(user_delete_account_request: UserDeleteAccountRequest):
+async def delete_account(
+        user_delete_account_request: UserDeleteAccountRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+):
+    user_collection = db.get_collection("users")
     user_email = user_delete_account_request.user_email
     password = user_delete_account_request.password
 

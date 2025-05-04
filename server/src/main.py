@@ -86,4 +86,4 @@ app.exception_handler(validation_exception_handler)
 
 @app.get("/")
 def root():
-	return JSONResponse(content={"detail": settings.app_name, "status": 200})
+    return JSONResponse(content={"detail": settings.app_name, "status": 200})
