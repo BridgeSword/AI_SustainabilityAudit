@@ -5,9 +5,11 @@ import NavBar from "../NavBar/NavBar.jsx";
 import MidPanel from "./MidPanel.jsx";
 import RightPanel from "./RightPanel.jsx";
 
-const Home = ({ historyData }) => {
+const Home = () => {
   const navigate = useNavigate(); // 0503
   const [formData, setFormData] = useState(null);
+  const historyRaw = sessionStorage.getItem("history");
+  const historyData = historyRaw ? JSON.parse(historyRaw) : [];
 
   return (
     <div className="home-container">

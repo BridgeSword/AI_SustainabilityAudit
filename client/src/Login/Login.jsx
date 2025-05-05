@@ -23,7 +23,7 @@ const Login = ({ onHistory }) => {
       if (response.ok && data.success) {
         console.log("Login successful", data);
         sessionStorage.setItem("username", username);
-        onHistory(data.history_list); // 0503
+        sessionStorage.setItem("history", JSON.stringify(data.history_list));
         sessionStorage.setItem("user_id", data.user_id);
         navigate("/");
       } else {
