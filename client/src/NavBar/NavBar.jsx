@@ -26,6 +26,7 @@ const NavBar = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem("username");
+    sessionStorage.removeItem("user_id");
     setUsername(null);
   };
 

@@ -7,7 +7,7 @@ from ..core.schemas import UserLoginRequest, UserSignUpRequest, UserChangePwdReq
     GenericResponse
 from ..core.schemas import UserOperationResponse
 from ..main import get_mongo_client
-
+from typing import Union
 
 from ..db.mongo.user import UserModel
 
@@ -47,7 +47,7 @@ async def login(
 @router.post(
     "/sign-up",
     tags=["User Operations"],
-    response_model=UserOperationResponse)
+    response_model=Union[UserOperationResponse, GenericResponse])
 async def signup(
         user_sign_up_request: UserSignUpRequest,
         db: AsyncIOMotorDatabase = Depends(get_mongo_client)

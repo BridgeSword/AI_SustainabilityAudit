@@ -18,12 +18,12 @@ const Login = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ user_email: username, password: password }),
-        credentials: "include"
       });
       const data = await response.json();
       if (response.ok && data.success) {
         console.log("Login successful", data);
         sessionStorage.setItem("username", username);
+        sessionStorage.setItem("user_id", data.user_id);
         navigate("/");
       } else {
         alert(data.message || "Login failed");
