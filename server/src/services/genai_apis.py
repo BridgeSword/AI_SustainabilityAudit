@@ -1,3 +1,4 @@
+import time
 from openai import OpenAI
 
 from typing import List, Dict
@@ -22,6 +23,8 @@ def call_genaiapi(SYSTEM_PROMPT: str,
         logger.info("######### " + genai_model + " #########")
         if "gemini" not in genai_model:
             genai_model = "-".join(genai_model.split("-")[1:])
+        else:
+            time.sleep(4)
 
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT}
