@@ -35,7 +35,7 @@ class CRPlanRequest:
 class CRPlanResponse:
     task_status: str = field(default_factory=str)
     error: str = field(default=None)
-    response: str = field(default=None)
+    response: Dict = field(default=None)
 
     def json(self):
         return {
@@ -80,7 +80,7 @@ class AIEditsRequest(BaseModel):
 
 class AIEditsResponse(BaseModel):
     section_id: str
-    modified_section: str
+    modified_content: str
 
 
 class ComputeDocumentEmbeddingsRequest(BaseModel):

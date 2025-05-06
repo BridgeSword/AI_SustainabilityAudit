@@ -136,10 +136,10 @@ class GAIModelEmbedder(Enum):
 
 class GAIModels(Enum):
     openai: Dict[str, str] = {
-        "4o": "gpt-4o",
-        "4o-mini": "gpt-4o-mini",
-        "o1": "o1",
-        "o1-mini": "o1-mini"
+        "4o": "openai-gpt-4o",
+        "4o-mini": "openai-gpt-4o-mini",
+        "o1": "openai-o1",
+        "o1-mini": "openai-o1-mini"
     }
 
     gemini: Dict[str, str] = {

@@ -24,11 +24,13 @@ The User will provide you the below three things:
 
 First, your job is to understand everything clearly and form an opinion on the outline, previous section content and the relevant context.
 
-Now, based on your understanding, you need to perfectly follow through the newly requested change by the user and make a modification to the existing carbon section to generate a new version of it. Finally, you need to return the new change as a JSON Output.
+Now, based on your understanding, you need to perfectly follow through the newly requested change by the user and make a modification to the existing carbon section to generate a new version of it.
+Also, Make sure to keep the newly generated section content to have almost the SAME LENGTH (in Number of Words) as the Previous Section Content.
 
-This is critical and remember to generate the JSON Output as below:
+Finally, you need to return the new change as a JSON Output.
+This is critical and remember to generate the output as a JSON as below:
 {
-    "modified_section": "new version of the section content"
+    "modified_content": <new version of the content in the detailed format having SAME LENGTH (in Number of Words)>
 }
 """
 
@@ -76,7 +78,7 @@ You're an expert Carbon Report Planner and based on the user provided instructio
 
 For a comprehensive report, any Carbon Report should consider the following aspects before generation:
 - Purpose and Scope as an Introduction
-- Given company's backgrond and operations
+- Given company's background and operations
 - Reporting Boundaries (such as Scope 1, Scope 2 and Scope 3 Emissions)
 - Approach to calculate the carbon emissions (such as activity-based ot spend-based)
 - Data Quality and Assurance
@@ -90,7 +92,7 @@ Note that the above given list is not exhaustive, but you can definitely use the
 
 Remember that a Carbon Report can span across 30 to 50 pages, so you should dive really deep into the user instructions provided without leaving any detail to come up with the plan. Also, a carbon report could have as many as 20 to 30 sections.
 
-First, try to reason about all the user insturctions to understand better and then generate a JSON output where each "key" should represent a high-level "Section Name" and the "value" should represent the high-level summary of the . So, this JSON should ideally hold multiple keys as Section Names and their respective values as summaries of the section details.
+First, try to reason about all the user instructions to understand better and then generate a JSON output where each "key" should represent a high-level "Section Name" and the "value" should represent the high-level summary of the . So, this JSON should ideally hold multiple keys as Section Names and their respective values as summaries of the section details.
 
 Make sure to follow the JSON Structure as specified below:
 {
@@ -113,7 +115,7 @@ After you generate the reasoning, you'll finally generate a JSON with two keys i
 """
 
 PLAN_MODIFICATION_CRITIQUE = """\
-Based on the generated plan, you need to make modificatons to include or change the plan to address the following things:
+Based on the generated plan, you need to make modifications to include or change the plan to address the following things:
 {critique}
 
 Note that you need to address these and generate a new plan in the same JSON format as before

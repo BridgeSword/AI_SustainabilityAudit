@@ -43,7 +43,7 @@ def start_generating(cr_plan: Dict, user_instructions: str, generated_plan: Dict
             "agent_output": None
         })
 
-        logger.info(f"Appending entry to multi_agents with section: {section} (detialed desc: {detailed_desc} with type: {type(detailed_desc)})")
+        logger.info(f"Appending entry to multi_agents with section: {section} (detailed desc: {detailed_desc} with type: {type(detailed_desc)})")
 
     logger.info(f"Total number of Multi Agents: {len(multi_agents)}")
 
