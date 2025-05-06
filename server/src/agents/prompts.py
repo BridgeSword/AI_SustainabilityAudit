@@ -24,11 +24,13 @@ The User will provide you the below three things:
 
 First, your job is to understand everything clearly and form an opinion on the outline, previous section content and the relevant context.
 
-Now, based on your understanding, you need to perfectly follow through the newly requested change by the user and make a modification to the existing carbon section to generate a new version of it. Finally, you need to return the new change as a JSON Output.
+Now, based on your understanding, you need to perfectly follow through the newly requested change by the user and make a modification to the existing carbon section to generate a new version of it.
+Also, Make sure to keep the newly generated section content to have almost the SAME LENGTH (in Number of Words) as the Previous Section Content.
 
-This is critical and remember to generate the JSON Output as below:
+Finally, you need to return the new change as a JSON Output.
+This is critical and remember to generate the output as a JSON as below:
 {
-    "modified_content": "new version of the section content"
+    "modified_content": <new version of the content in the detailed format having SAME LENGTH (in Number of Words)>
 }
 """
 

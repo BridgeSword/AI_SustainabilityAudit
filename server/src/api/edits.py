@@ -175,6 +175,7 @@ async def ai_edits(
 
     if not edits or len(edits) == 0:
         latest_content = section.get("agentOutput")
+        edits = {}
         edits["previous_versions"] = [latest_content]
     else:
         latest_content = edits["latest"]
@@ -218,7 +219,7 @@ async def ai_edits(
     if len(relevant_ctx) > 0:
         context = ADDITIONAL_CONTEXT.format(context="\n\n".join(relevant_ctx))
 
-    edit_instruction = context + "\n\n" + user_instructions + "\n\n" + latest_content
+    edit_instruction = context + "\n\n" + user_instructions + "\n\nPreviously Generated Section Content:\n" + latest_content
     edit_instruction = edit_instruction.strip()
 
     edit_agent = AgentBase(genai_model=genai_model_variant, 
