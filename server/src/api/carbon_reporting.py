@@ -184,11 +184,13 @@ async def plan_report_ws(
 
                     logger.info("\n\nGenerated Plan: \n{}\n\n\n".format(generated_plan))
 
+                    generated_plan_str_format = {}
                     for section_name, section_summary in generated_plan.items():
                         curr_section = SectionModel(
                             name=str(section_name),
                             initial_summary=str(section_summary)
                         )
+                        generated_plan_str_format[str(section_name)] = str(section_summary)
 
                         curr_section = await section_collection.insert_one(
                             curr_section.model_dump(by_alias=True, exclude=["id"])
@@ -208,7 +210,7 @@ async def plan_report_ws(
                     await ws_manager.send_json_obj(
                         CRPlanResponse(
                             task_status = Status.success.value,
-                            response = generated_plan
+                            response = generated_plan_str_format
                         ).json(), websocket)
                     
                     current_status = WebsocketStatus.user_acceptance.value
