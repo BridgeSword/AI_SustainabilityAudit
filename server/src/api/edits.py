@@ -67,7 +67,7 @@ async def manual_edits(
     if not edits:
         edits = {
             "latest": user_edit,
-            "previous_versions": []
+            "previous_versions": [section.get("agentOutput")]
         }
     else:
         edits["previous_versions"] += [edits["latest"]]
@@ -170,14 +170,15 @@ async def ai_edits(
             response = f"No Section found with ID: {str(section_id)}", 
             status = Status.invalid.value
         )
-    
-    latest_content = None
-    edits = section.get("edits", None)
 
-    if not edits:
-        latest_content = section.get("agent_output")
+    edits = section.get("edits", {})
+
+    if not edits or len(edits) == 0:
+        latest_content = section.get("agentOutput")
+        edits["previous_versions"] = [latest_content]
     else:
         latest_content = edits["latest"]
+        edits["previous_versions"] += [latest_content]
 
     user_instructions = USER_INSTRUCTIONS.format(
         company=report.get("company").upper(),
@@ -226,24 +227,35 @@ async def ai_edits(
                            system_message=SYSTEM_PROMPT_AI_EDIT
                         )
     
-    modified_section = None
+    modified_content = None
 
     for _ in range(2):
         try:
             agent_out = edit_agent(edit_instruction, json_out=True)[0]
-            modified_section = agent_out["modified_section"]
+            modified_content = agent_out["modified_content"]
             break
         except:
             edit_agent.clear_history()
             logger.info("------------Some issue in processing Agent output or intialization, trying again...------------")
 
-    if not modified_section:
+    if not modified_content:
         return GenericResponse(
             response = "Some issue occured during processing of Agent request...",
             status = Status.failed.value
         )
 
+    edits["latest"] = modified_content
+
+    await section_collection.find_one_and_update(
+        {"_id": section_id},
+        {"$set":
+            {
+                "edits": edits
+            }
+        }
+    )
+
     return AIEditsResponse(
         section_id = str(section_id),
-        modified_section=modified_section
+        modified_content=modified_content
     )

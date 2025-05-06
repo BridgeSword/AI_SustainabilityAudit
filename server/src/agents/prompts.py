@@ -28,7 +28,7 @@ Now, based on your understanding, you need to perfectly follow through the newly
 
 This is critical and remember to generate the JSON Output as below:
 {
-    "modified_section": "new version of the section content"
+    "modified_content": "new version of the section content"
 }
 """
 

@@ -1,5 +1,8 @@
 from fastapi import WebSocket
 import json
+from ..core.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class WSConnectionManager:
@@ -24,5 +27,6 @@ class WSConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)
-            except:
+            except Exception as e:
+                logger.error(f"Failed to send message: {e}")
                 await self.disconnect_and_close(connection)
