@@ -278,7 +278,13 @@ async def plan_report_ws(
 
                 whole_report = "\n\n".join(whole_report)
 
-                create_multipage_pdf(whole_report, f"carbon_report_{str(report.inserted_id)}.pdf")
+                pdf_filename = f"carbon_report_{str(report.inserted_id)}.pdf"
+
+                create_multipage_pdf(
+                    text=whole_report,
+                    company_name=req_report.get("company"),
+                    filename=pdf_filename
+                )
 
                 final_report = []
 
@@ -287,7 +293,7 @@ async def plan_report_ws(
                         "section": section_detail["section"],
                         "description": section_detail["description"],
                         "agent_output": section_detail["agent_output"],
-                        "section_id": req_section_ids[idx]
+                        "section_id": str(req_section_ids[idx])
                     })
 
                 await ws_manager.send_json_obj(

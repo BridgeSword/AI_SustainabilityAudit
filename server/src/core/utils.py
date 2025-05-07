@@ -2,10 +2,15 @@ import os
 import json
 import logging
 import hashlib
+from pathlib import Path
 
 import torch
 
 from markdown_pdf import MarkdownPdf, Section
+
+from fpdf import Align
+from pdfnumbering import PdfNumberer
+from pypdf import PdfWriter
 
 from ..core.config import settings
 
@@ -93,8 +98,32 @@ def extract_json(s, index=0):
 def thresolder(curr_val, max_val):
     return min(curr_val, max_val)
 
-def create_multipage_pdf(text, filename="output.pdf"):
-    pdf = MarkdownPdf()
 
-    pdf.add_section(Section(text.strip(), toc=False))
-    pdf.save(os.path.join(settings.carbon_reports_path, filename))
+def add_pdf_numbering(file_path):
+    numberer = PdfNumberer(
+        first_number=1,
+        ignore_pages=(),
+        skip_pages=(),
+        stamp_format="{}",
+        font_size=12,
+        font_family="Helvetica",
+        text_color=(0x18, 0x18, 0x18),
+        text_align=Align.C,
+        text_position=(0, -1),
+        # page_margin=(28, 28),
+    )
+
+    document = PdfWriter(clone_from = file_path)
+    numberer.add_page_numbering(document.pages)
+    document.write(file_path)
+
+
+def create_multipage_pdf(text, company_name, filename="output.pdf"):
+    pdf_title = f"# {company_name} Carbon report\n\n"
+    file_path = os.path.join(settings.carbon_reports_path, filename)
+
+    pdf = MarkdownPdf()
+    pdf.add_section(Section(pdf_title + text.strip(), toc=False))
+    pdf.save(file_path)
+
+    add_pdf_numbering(Path(str(file_path)))
