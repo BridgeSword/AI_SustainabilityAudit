@@ -226,6 +226,7 @@ async def plan_report_ws(
             elif current_status == WebsocketStatus.user_acceptance.value:
                 user_accepted = await websocket.receive_json()
 
+                # handle received json better here
                 if user_accepted["proceed"]:
                     current_status = WebsocketStatus.generate.value
                     continue

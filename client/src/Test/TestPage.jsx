@@ -18,6 +18,7 @@ const TestPage = () => {
   const [sections, setSections] = useState(initialSections);
   const [selectedSection, setSelectedSection] = useState(null);
   const [chatInput, setChatInput] = useState("");
+  const [reportId, setReportId] = useState("")
   const [chatHistory, setChatHistory] = useState([
     {
       role: "assistant",
@@ -74,7 +75,9 @@ const TestPage = () => {
       if (data.task_status === "SUCCESS" && data.response) {
         console.log("TestPage got final data =>", data);
 
-        const resultArray = Array.isArray(data.response) ? data.response : [];
+        setReportId(data.response["report_id"])
+
+        const resultArray = Array.isArray(data.response["generated_report"]) ? data.response["generated_report"] : [];
         const newSections = resultArray.map(item => {
           const content = item.agent_output;
           return { title: item.section, content };
@@ -271,75 +274,41 @@ const TestPage = () => {
     navigate("/jobs", { state: { sections } });
   };
 
-  const handleDownload = () => {
-    const htmlContent = sections
-      .map(({ title, content }, i) => {
-        const transformed = content
-          .replace(/^={3,}$/gm, '<hr>')
-          .replace(/^-{3,}$/gm, '<hr>')
-          .replace(/^###\s*(.+)$/gm, '<strong>$1</strong><br>')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\n/g, '<br>');
-  
-        const breakAfter = i < sections.length - 1
-          ? 'page-break-after: always;'
-          : '';
-  
-        return `
-          <div class="page" style="
-            break-inside: avoid;
-            page-break-inside: avoid;
-            ${breakAfter}
-          ">
-            <h3>${title}</h3>
-            <div>${transformed}</div>
-          </div>
-        `;
-      })
-      .join('');
-  
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = `
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        .page {
-          /* never split this container */
-          break-inside: avoid;
-          page-break-inside: avoid;
-          -webkit-column-break-inside: avoid;
-          -moz-column-break-inside: avoid;
-          margin-bottom: 1.5em;
-        }
-        h3 {
-          margin-bottom: .5em;
-          font-size: 1.2em;
-        }
-        hr {
-          border: none;
-          border-top: 2px solid #333;
-          margin: 1em 0;
-        }
-        div, br {
-          margin-bottom: .5em;
-          line-height: 1.4;
-        }
-        strong { font-weight: bold; }
-      </style>
-      ${htmlContent}
-    `;
-  
-    html2pdf()
-      .set({
-        margin:       0.5,
-        filename:     'Carbon_Report.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      })
-      .from(wrapper)
-      .save();
-  };
-  
+  const handleDownloadReport = async () => {
+    if (reportId === "") {
+      alert("Report ID is empty, so unable to download!");
+      return;
+    }
+
+    try {
+      const resp = await fetch('http://localhost:9092/downloads/v1/report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({'report_id': reportId}),
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        alert(Error(text))
+      }else {
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = reportId;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+
+    } catch (err) {
+      console.error('Error downloading file:', err);
+    }
+
+  }
 
   const enterPreviewMode = () => {
     setPreviewMode(true);
@@ -400,7 +369,7 @@ const TestPage = () => {
               <button className="test-generate-job-button" onClick={exitPreviewMode}>
                 AI-Assisted Edit
               </button>
-              <button className="test-generate-job-button" onClick={handleDownload}>
+              <button className="test-generate-job-button" onClick={handleDownloadReport}>
                 Download
               </button>
             </div>

@@ -3,14 +3,13 @@ import os
 
 from bson.objectid import ObjectId
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from ..core.config import settings
-from ..core.constants import Status
-from ..core.schemas import DownloadsRequest, GenericResponse
+from ..core.schemas import DownloadsRequest
 from ..core.utils import get_logger
 
 from ..main import get_mongo_client
@@ -32,17 +31,17 @@ async def downloads(
     report_id = downloads_req.report_id
 
     if not report_id:
-        return GenericResponse(
-            response="Section ID and User Edits should not be empty or None",
-            status=Status.failed.value
+        raise HTTPException(
+            detail="Report ID should not be empty or None",
+            status_code=400
         )
 
     try:
         report_id = ObjectId(report_id)
     except:
-        return GenericResponse(
-            response="Invalid Report Id Format",
-            status=Status.invalid.value
+        raise HTTPException(
+            detail="Invalid Report Id Format",
+            status_code=400
         )
 
     report = await report_collection.find_one(
@@ -50,17 +49,17 @@ async def downloads(
     )
 
     if not report:
-        return GenericResponse(
-            response = f"Report not found with ID: {str(report_id)}",
-            status = Status.failed.value
+        raise HTTPException(
+            detail = f"Report not found with ID: {str(report_id)}",
+            status_code = 400
         )
 
     report_path = os.path.join(settings.carbon_reports_path, f"carbon_report_{str(report_id)}.pdf")
 
     if not os.path.exists(report_path):
-        return GenericResponse(
-            response = "Report is not yet generated or the process might've failed. Please check logs!",
-            status = Status.in_progress.value
+        raise HTTPException(
+            detail = "Report is not yet generated or the process might've failed. Please check logs!",
+            status_code = 400
         )
 
     mime_type, _ = mimetypes.guess_type(report_path)
