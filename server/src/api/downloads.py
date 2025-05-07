@@ -21,9 +21,9 @@ router = APIRouter()
 
 @router.post(
         "/report",
-        tags=["Document Embeddings"],
-        description="Compute embeddings from documents and stores them in Milvus Vector Store")
-async def generate_embeddings(
+        tags=["Downloads"],
+        description="Downloads a file based on the report_id")
+async def downloads(
     downloads_req: DownloadsRequest,
     db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
