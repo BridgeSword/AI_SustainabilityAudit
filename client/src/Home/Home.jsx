@@ -22,10 +22,10 @@ const Home = () => {
             {historyData != null && historyData.length > 0 ? (
             historyData.map((report) => (
               <button
-                key={report._id}
+                key={report.reportName}
                 onClick={() => navigate("/history-report", { state: { report } })}
               >
-                {report._id}
+                {report.reportName}
               </button>
             ))
           ) : (

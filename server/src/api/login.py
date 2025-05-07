@@ -42,6 +42,7 @@ async def login(
     history_list = [
         {
             "_id":      str(r.get("_id")),
+            "reportName": str(r.get("reportName", "")),
             "standard": str(r.get("standard", "")),
             "goal": str(r.get("goal", "")),
             "user_plan": str(r.get("user_plan", "")),

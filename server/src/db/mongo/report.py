@@ -9,6 +9,7 @@ class ReportModel(MongoBase):
     user_id: Optional[PyObjectId] = Field(alias="userId", default=None)
     section_ids: Optional[List[PyObjectId]] = Field(alias="sectionIds", default=None)
 
+    report_name: str = Field(alias="reportName", default=None)
     standard: str = Field(...)
     goal: str = Field(...)
     user_plan: str = Field(...)

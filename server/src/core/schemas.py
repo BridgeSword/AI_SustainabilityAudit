@@ -23,6 +23,7 @@ class CarbonReportPlanRequest(BaseModel):
 @dataclass
 class CRPlanRequest:
     user_id: str = field(default=None)
+    report_name: str = field(default=None)
     standard: str = field(default=None)
     goal: str = field(default=None)
     plan: str = field(default=None)

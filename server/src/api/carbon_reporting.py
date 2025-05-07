@@ -71,6 +71,7 @@ async def plan_report_ws(
                     cr_std_prompt = f"{cr_std.full_form}: {cr_std.description}"
                     
                     cr_plan_obj.user_id = cr_plan_req["user_id"]
+                    cr_plan_obj.report_name = cr_plan_req["report_name"]
                     cr_plan_obj.standard = cr_std_prompt
                     cr_plan_obj.goal = cr_plan_req["goal"]
                     cr_plan_obj.plan = cr_plan_req["plan"]
@@ -79,6 +80,7 @@ async def plan_report_ws(
 
                     report = ReportModel(
                         user_id=cr_plan_obj.user_id,
+                        report_name=cr_plan_obj.report_name,
                         standard=cr_plan_obj.standard,
                         goal=cr_plan_obj.goal,
                         user_plan=cr_plan_obj.plan,

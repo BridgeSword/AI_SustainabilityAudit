@@ -46,6 +46,7 @@ const RightPanel = ({ formData }) => {
     globalWs.send(
       JSON.stringify({
         user_id: sessionStorage.getItem("user_id"),
+        report_name: formData.reportName,
         standard: formData.standard,
         goal: formData.carboGoal,
         plan: formData.carbonPlan,
