@@ -1,17 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import NavBar from "../NavBar/NavBar.jsx";
 import MidPanel from "./MidPanel.jsx";
 import RightPanel from "./RightPanel.jsx";
 
 const Home = () => {
-  const pdfReports = [
-    { name: "report1.pdf", path: "/data/reports/report1.pdf" },
-    { name: "report2.pdf", path: "/data/reports/report2.pdf" },
-    { name: "report3.pdf", path: "/data/reports/report3.pdf" }
-  ];
-
+  const navigate = useNavigate(); // 0503
   const [formData, setFormData] = useState(null);
+  const historyRaw = sessionStorage.getItem("history");
+  const historyData = historyRaw ? JSON.parse(historyRaw) : [];
 
   return (
     <div className="home-container">
@@ -21,11 +19,18 @@ const Home = () => {
           <button className="text-button">+ New Report</button>
           <div className="history">
             <h3 className="history-title">History</h3>
-            {pdfReports.map((report) => (
-              <button key={report.name} onClick={() => window.open(report.path, "_blank")}>
-                {report.name}
+            {historyData != null && historyData.length > 0 ? (
+            historyData.map((report) => (
+              <button
+                key={report.reportName}
+                onClick={() => navigate("/history-report", { state: { report } })}
+              >
+                {report.reportName}
               </button>
-            ))}
+            ))
+          ) : (
+            <p>No history available.</p> // or just leave this blank if you want nothing
+          )}
           </div>
         </div>
 

@@ -2,6 +2,7 @@ from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field, field_validator, EmailStr
+from sympy import O
 
 
 class CarbonReportPlanRequest(BaseModel):
@@ -21,6 +22,8 @@ class CarbonReportPlanRequest(BaseModel):
 
 @dataclass
 class CRPlanRequest:
+    user_id: str = field(default=None)
+    report_name: str = field(default=None)
     standard: str = field(default=None)
     goal: str = field(default=None)
     plan: str = field(default=None)
@@ -135,6 +138,8 @@ class UserLoginRequest(BaseModel):
 class UserSignUpRequest(BaseModel):
     user_email: EmailStr
     password: str
+    company_name: str
+
 
 
 class UserChangePwdRequest(BaseModel):
@@ -151,7 +156,17 @@ class UserDeleteAccountRequest(BaseModel):
 class UserOperationResponse(BaseModel):
     success: bool = Field(default=None)
     user_id: str = Field(default=None)
+    company: Optional[str] = Field(default=None)
     message: str = Field(default=None)
+    history_list: Optional[List[Dict[str, str]]] = None
+
+class HistoryRequest(BaseModel):
+    report_title: str = Field(default=None)
+    created_at: str = Field(default=None)
+
+class HistoryResponse(BaseModel):
+    success: bool = Field(default=None)
+    report: str = Field(default=None)
 
 
 class DownloadsRequest(BaseModel):

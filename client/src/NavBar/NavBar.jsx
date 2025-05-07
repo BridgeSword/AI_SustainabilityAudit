@@ -25,8 +25,9 @@ const NavBar = () => {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("username");
+    sessionStorage.clear();
     setUsername(null);
+    navigate("/");
   };
 
 

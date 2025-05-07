@@ -45,11 +45,14 @@ const RightPanel = ({ formData }) => {
 
     globalWs.send(
       JSON.stringify({
+        user_id: sessionStorage.getItem("user_id"),
+        report_name: formData.reportName,
         standard: formData.standard,
         goal: formData.carboGoal,
         plan: formData.carbonPlan,
         action: formData.carbonAction,
-        company: "Cornell University",
+        // company: "Cornell University",
+        company: sessionStorage.getItem("company") || "Cornell University",
         device: "cpu",
         genai_model: "ollama-llama3.2"
       })
@@ -66,7 +69,7 @@ const RightPanel = ({ formData }) => {
       clearInterval(progressTimerRef.current);
     }
     const start = Date.now();
-    const total = 120000; 
+    const total = 10000; 
 
     progressTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - start;

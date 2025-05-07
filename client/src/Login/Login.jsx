@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import NavBar from "../NavBar/NavBar";
 
-const Login = () => {
+const Login = ({ onHistory }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   
@@ -18,12 +18,14 @@ const Login = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ user_email: username, password: password }),
-        credentials: "include"
       });
       const data = await response.json();
       if (response.ok && data.success) {
         console.log("Login successful", data);
         sessionStorage.setItem("username", username);
+        sessionStorage.setItem("history", JSON.stringify(data.history_list));
+        sessionStorage.setItem("user_id", data.user_id);
+        sessionStorage.setItem("company", data.company);
         navigate("/");
       } else {
         alert(data.message || "Login failed");
