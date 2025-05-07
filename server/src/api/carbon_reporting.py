@@ -278,23 +278,29 @@ async def plan_report_ws(
 
                 whole_report = "\n\n".join(whole_report)
 
-                create_multipage_pdf(whole_report, f"carbon_report_{str(report.inserted_id)}.pdf")
+                pdf_filename = f"carbon_report_{str(report.inserted_id)}.pdf"
+
+                create_multipage_pdf(
+                    text=whole_report,
+                    company_name=req_report.get("company"),
+                    filename=pdf_filename
+                )
 
                 final_report = []
 
                 for idx, section_detail in enumerate(generated_report):
                     final_report.append({
-                        "section": section_detail["section"],
-                        "description": section_detail["description"],
-                        "agent_output": section_detail["agent_output"],
-                        "section_id": req_section_ids[idx]
+                        "section": str(section_detail["section"]),
+                        "description": str(section_detail["description"]),
+                        "agent_output": str(section_detail["agent_output"]),
+                        "section_id": str(req_section_ids[idx])
                     })
 
                 await ws_manager.send_json_obj(
                     CRPlanResponse(
                         task_status = Status.success.value,
-                        response ={
-                            "report_id": report.inserted_id,
+                        response = {
+                            "report_id": str(report.inserted_id),
                             "generated_report": final_report
                         }
                     ).json(), websocket)
