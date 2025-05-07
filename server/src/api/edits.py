@@ -87,7 +87,7 @@ async def manual_edits(
         status = Status.success.value
     )
 
-
+import json
 @router.post(
     "/ai",
     tags=["PDF Edit Requests"],
@@ -129,7 +129,7 @@ async def ai_edits(
         )
 
     genai_model_variant = genai_models.get("-".join(gai_model[1:]), None)
-
+    is_ollama  = genai_model.lower().startswith("ollama")
     if not genai_model_variant:
         return GenericResponse(
             response=f"Unknown GenAI model variant: {"-".join(gai_model[1:])}",
@@ -229,15 +229,36 @@ async def ai_edits(
                         )
     
     modified_content = None
+    for attempt in range(1, 3):
+            try:
+                if is_ollama:
+        
+                    raw = edit_agent(edit_instruction)
+               
+    
+                    modified_content = raw.strip()
+                    try:
+                        parsed = json.loads(raw)
+                        modified_content = parsed.get("modified_content")
+                    except json.JSONDecodeError:
+                        modified_content = raw.strip()
+                else:
+     
+                    out = edit_agent(edit_instruction, json_out=True)
+                    logger.info("← OpenAI json_out raw (attempt %d): %s", attempt, out)
+                    if isinstance(out, list) and out:
+                        modified_content = out[0].get("modified_content")
 
-    for _ in range(2):
-        try:
-            agent_out = edit_agent(edit_instruction, json_out=True)[0]
-            modified_content = agent_out["modified_content"]
-            break
-        except:
-            edit_agent.clear_history()
-            logger.info("------------Some issue in processing Agent output or intialization, trying again...------------")
+                if modified_content:
+                    break
+            except json.JSONDecodeError as e:
+             
+                logger.error("Failed to json.loads")
+                edit_agent.clear_history()
+            except Exception as e:
+         
+                logger.exception("AI edit attempt %d failed for model %s", attempt, genai_model)
+                edit_agent.clear_history()
 
     if not modified_content:
         return GenericResponse(
