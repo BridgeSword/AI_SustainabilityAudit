@@ -129,23 +129,29 @@ class SearchEmbRequest(BaseModel):
     def ensure_device(cls, device: Optional[str]) -> str:
         return device or "cpu"
 
+
 class UserLoginRequest(BaseModel):
     user_email: EmailStr
     password: str
+
 
 class UserSignUpRequest(BaseModel):
     user_email: EmailStr
     password: str
     company_name: str
 
+
+
 class UserChangePwdRequest(BaseModel):
     user_email: EmailStr
     old_password: str
     new_password: str
 
+
 class UserDeleteAccountRequest(BaseModel):
     user_email: EmailStr
     password: str
+
 
 class UserOperationResponse(BaseModel):
     success: bool = Field(default=None)
@@ -161,3 +167,7 @@ class HistoryRequest(BaseModel):
 class HistoryResponse(BaseModel):
     success: bool = Field(default=None)
     report: str = Field(default=None)
+
+
+class DownloadsRequest(BaseModel):
+    report_id: str = Field(default=None)
