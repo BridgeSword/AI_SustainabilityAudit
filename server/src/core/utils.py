@@ -119,11 +119,13 @@ def add_pdf_numbering(file_path):
 
 
 def create_multipage_pdf(text, company_name, filename="output.pdf"):
-    pdf_title = f"# {company_name} Carbon report\n\n"
+    pdf_title = f"<center><h1>{company_name} Carbon Report</h1></center>\n\n"
     file_path = os.path.join(settings.carbon_reports_path, filename)
 
     pdf = MarkdownPdf()
+
     pdf.add_section(Section(pdf_title + text.strip(), toc=False))
+
     pdf.save(file_path)
 
     add_pdf_numbering(Path(str(file_path)))

@@ -290,17 +290,17 @@ async def plan_report_ws(
 
                 for idx, section_detail in enumerate(generated_report):
                     final_report.append({
-                        "section": section_detail["section"],
-                        "description": section_detail["description"],
-                        "agent_output": section_detail["agent_output"],
+                        "section": str(section_detail["section"]),
+                        "description": str(section_detail["description"]),
+                        "agent_output": str(section_detail["agent_output"]),
                         "section_id": str(req_section_ids[idx])
                     })
 
                 await ws_manager.send_json_obj(
                     CRPlanResponse(
                         task_status = Status.success.value,
-                        response ={
-                            "report_id": report.inserted_id,
+                        response = {
+                            "report_id": str(report.inserted_id),
                             "generated_report": final_report
                         }
                     ).json(), websocket)
