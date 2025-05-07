@@ -25,6 +25,7 @@ const Login = ({ onHistory }) => {
         sessionStorage.setItem("username", username);
         sessionStorage.setItem("history", JSON.stringify(data.history_list));
         sessionStorage.setItem("user_id", data.user_id);
+        sessionStorage.setItem("company", data.company);
         navigate("/");
       } else {
         alert(data.message || "Login failed");

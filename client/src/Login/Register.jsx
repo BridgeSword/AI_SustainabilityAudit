@@ -30,7 +30,7 @@ const Register = () => {
           console.log("Register successful", data);
           sessionStorage.setItem("username", username);
           sessionStorage.setItem("user_id", data.user_id);
-          sessionStorage.setItem("company_name", companyName);
+          sessionStorage.setItem("company", companyName);
           navigate("/");
         } else {
           alert(data.message || "Registration failed");

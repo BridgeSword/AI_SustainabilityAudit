@@ -54,6 +54,7 @@ async def login(
     return UserOperationResponse(
         success=True,
         user_id=str(user["_id"]),
+        company=str(user.get("company", "unknown")),
         message="Login successful",
         history_list=jsonable_encoder(history_list),
     )
