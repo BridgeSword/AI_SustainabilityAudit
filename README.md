@@ -92,9 +92,9 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
 5. ⚙️ Optional: Add Ollama as a Startup Service
       For convenience, you can set up Ollama to start automatically with your system:
    
-    ```bash     
+ 
       Create a user and group for Ollama:
-     ```
+
     ```bash           
       sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
       sudo usermod -a -G ollama $(whoami)
