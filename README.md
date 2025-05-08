@@ -103,7 +103,7 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
    
      ```bash    
       sudo nano /etc/systemd/system/ollama.service
-       ```     
+     ```     
       Add the following content:
      ```bash          
       [Unit]
@@ -123,14 +123,14 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
       
       [Install]
       WantedBy=default.target
-       ```  
+     ```  
       Reload systemd and enable the service:
      ```bash        
       sudo systemctl daemon-reload
       sudo systemctl enable ollama
       sudo systemctl start ollama
       This will start Ollama as a background service.
-       ```  
+     ```  
 ---
 
 ### 🧬 Backend
