@@ -129,8 +129,9 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
       sudo systemctl daemon-reload
       sudo systemctl enable ollama
       sudo systemctl start ollama
-      This will start Ollama as a background service.
-     ```  
+
+     ```
+   This will start Ollama as a background service. 
 ---
 
 ### 🧬 Backend
