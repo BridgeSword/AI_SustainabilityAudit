@@ -40,25 +40,25 @@ async def manual_edits(
 
     if not section_id or not user_edit:
         return GenericResponse(
-            response = "Section ID and User Edits should not be empty or None", 
+            response = "Section ID and User Edits should not be empty or None",
             status = Status.failed.value
         )
-    
+
     try:
         section_id = ObjectId(section_id)
     except:
         return GenericResponse(
-            response = "Invalid Section Id Format", 
+            response = "Invalid Section Id Format",
             status = Status.invalid.value
         )
-    
+
     section = await section_collection.find_one(
         {"_id": section_id}
     )
 
     if not section:
         return GenericResponse(
-            response = f"No Section found with ID: {str(section_id)}", 
+            response = f"No Section found with ID: {str(section_id)}",
             status = Status.invalid.value
         )
 
@@ -75,7 +75,7 @@ async def manual_edits(
 
     section_update = await section_collection.find_one_and_update(
         {"_id": section_id},
-        {"$set": 
+        {"$set":
             {
                 "edits": edits
             }
@@ -111,7 +111,7 @@ async def ai_edits(
 
     if device is None:
         device = "cpu"
-    
+
     gai_model = genai_model.lower().split("-")
 
     if len(gai_model) < 2:
@@ -138,36 +138,36 @@ async def ai_edits(
 
     if not section_id or not user_request:
         return GenericResponse(
-            response = "Section ID and User Edits should not be empty or None", 
+            response = "Section ID and User Edits should not be empty or None",
             status = Status.failed.value
         )
-    
+
     try:
         section_id = ObjectId(section_id)
         report_id = ObjectId(report_id)
     except:
         return GenericResponse(
-            response = "Invalid Report Id or Section Id Format", 
+            response = "Invalid Report Id or Section Id Format",
             status = Status.invalid.value
         )
-    
+
     report = await report_collection.find_one(
         {"_id": report_id}
     )
 
     if not report:
         return GenericResponse(
-            response = f"No Report found with ID: {str(report_id)}", 
+            response = f"No Report found with ID: {str(report_id)}",
             status = Status.invalid.value
         )
-    
+
     section = await section_collection.find_one(
         {"_id": section_id}
     )
 
     if not section:
         return GenericResponse(
-            response = f"No Section found with ID: {str(section_id)}", 
+            response = f"No Section found with ID: {str(section_id)}",
             status = Status.invalid.value
         )
 
@@ -183,17 +183,17 @@ async def ai_edits(
 
     user_instructions = USER_INSTRUCTIONS.format(
         company=report.get("company").upper(),
-        carbon_std=report.get("standard"), 
-        carbon_goal=report.get("goal"), 
-        carbon_plan=report.get("user_plan"), 
+        carbon_std=report.get("standard"),
+        carbon_goal=report.get("goal"),
+        carbon_plan=report.get("user_plan"),
         carbon_action=report.get("action")
     )
-    
+
     embedding_model = "stella_15"
     emb_model = settings.embedders.model_fields[embedding_model].default
 
     embedder = SentenceTransformer(emb_model,
-                                   trust_remote_code=True, 
+                                   trust_remote_code=True,
                                    device=device)
 
     query_embedding = embedder.encode(user_instructions, device=device)
@@ -205,7 +205,7 @@ async def ai_edits(
         anns_field="vector_embs",
         data=[query_embedding],
         limit=3,
-        search_params={"metric_type": "L2"}, 
+        search_params={"metric_type": "L2"},
         output_fields=["text_chunk"]
     )
 
@@ -222,12 +222,12 @@ async def ai_edits(
     edit_instruction = context + "\n\n" + user_instructions + "\n\nPreviously Generated Section Content:\n" + latest_content
     edit_instruction = edit_instruction.strip()
 
-    edit_agent = AgentBase(genai_model=genai_model_variant, 
-                           temperature=0.7, 
-                           device=device, 
+    edit_agent = AgentBase(genai_model=genai_model_variant,
+                           temperature=0.7,
+                           device=device,
                            system_message=SYSTEM_PROMPT_AI_EDIT
                         )
-    
+
     modified_content = None
 
     for _ in range(2):

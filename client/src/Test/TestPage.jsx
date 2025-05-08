@@ -76,11 +76,11 @@ const TestPage = () => {
         console.log("TestPage got final data =>", data);
 
         setReportId(data.response["report_id"])
-
+        console.log(reportId)
         const resultArray = Array.isArray(data.response["generated_report"]) ? data.response["generated_report"] : [];
         const newSections = resultArray.map(item => {
           const content = item.agent_output;
-          return { title: item.section, content };
+          return { title: item.section, content: content, id: item.section_id, };
         });
 
         if (newSections.length > 0) {
@@ -112,9 +112,11 @@ const TestPage = () => {
     if (Array.isArray(data)) {
       const newSections = data.map(item => {
         const content = `${item.description}\n\n${item.agent_output}`;
-        return { title: item.section, content };
+        
+        return { title: item.section, id:item.section_id, content };
       });
       setSections(newSections);
+      console.log(newSections)
     } else if (typeof data === "string") {
       const parsedSections = data
         .split("###")
@@ -184,10 +186,34 @@ const TestPage = () => {
     setEditContent(sections[selectedSection].content);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async(e) => {
     if (selectedSection === null || !editContent.trim()) {
       alert("Please input something to modify!");
       return;
+    }
+
+    const section = sections[selectedSection];
+    const sectionId = section.id || section._id;   
+    const userEdit = editContent;
+
+    try {
+      const resp = await fetch("http://localhost:9092/edits/v1/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section_id: sectionId,
+          user_edit:  userEdit
+        })
+      });
+      const result = await resp.json();
+      console.log(result)
+      if (!resp.ok || result.status !== "SUCCESS") {
+        throw new Error(result.response || "Manual save failed");
+      }
+    } catch (err) {
+      console.error("Manual save failed:", err);
+      alert("SAVE ERROR!");
+      return;  
     }
     setSections((prevSections) => {
       const newSections = [...prevSections];
@@ -197,14 +223,6 @@ const TestPage = () => {
       };
       return newSections;
     });
-
-    const currentTitle = sections[selectedSection].title;
-    const userMsg = { role: "user", content: editContent };
-    const assistantMsg = {
-      role: "assistant",
-      content: `Updated "${currentTitle}" in preview mode.`,
-    };
-    setChatHistory((prev) => [...prev, userMsg, assistantMsg]);
 
     setIsEditing(false);
   };
@@ -239,7 +257,7 @@ const TestPage = () => {
     setChatHistory(updatedChatHistory);
   };
 
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) {
       alert("Please input something to modify！");
@@ -253,21 +271,50 @@ const TestPage = () => {
     const currentTitle = sections[selectedSection].title;
     const userMsg = { role: "user", content: chatInput };
 
-    const updatedChatHistory = chatHistory.map((chat) => ({
-      ...chat,
-      pendingApproval: false,
-    }));
-
-    const assistantMsg = {
-      role: "assistant",
-      content: `Proposed change for "${currentTitle}": ${chatInput}`,
-      pendingApproval: true,
-      sectionIndex: selectedSection,
+    setChatHistory(prev =>
+      prev.map(c => ({ ...c, pendingApproval: false }))
+          .concat(userMsg)
+    );
+    const payload = {
+      report_id:    reportId,                       
+      section_id:   sections[selectedSection].id, 
+      user_request: chatInput,
+      genai_model:  "ollama-llama3.2",         
+      device:       "cpu"
     };
 
-    setChatHistory([...updatedChatHistory, userMsg, assistantMsg]);
+    console.log("AI edit payload:", payload);
+
+    try {
+      const resp = await fetch("http://localhost:9092/edits/v1/ai", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload),
+      });
+      const result = await resp.json();
+  
+      if (!resp.ok || !result.modified_content) {
+        throw new Error(result.response || result.error || "Unknown AI error");
+      }
+
+      const assistantMsg = {
+        role:            "assistant",
+        content:         `Proposed change for "${currentTitle}": ${result.modified_content}`,
+        pendingApproval: true,
+        sectionIndex:    selectedSection,
+      };
+      setChatHistory(prev => [...prev, assistantMsg]);
+  
+    } catch (err) {
+      console.error("AI edit failed:", err);
+      setChatHistory(prev => [
+        ...prev,
+        { role: "assistant", content: "AI editing failed, please try again." }
+      ]);
+    }
     setChatInput("");
   };
+
 
   const handleGenerateJob = () => {
     console.log("Generated with data:", sections);
