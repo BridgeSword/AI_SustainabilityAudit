@@ -46,7 +46,7 @@ This repository contains the frontend and backend components for the **MARAG** p
 
 ---
 
-### 🤖 Ollama (Optional: If Using Local LLM Inference)
+### 🤖 Ollama (Optional: If Using Local LLM Inference)_MAC version installation
 
 If you are using [Ollama](https://ollama.com/) for local inference with LLaMA models:
 
@@ -67,6 +67,49 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
    ```bash
    ollama serve --host 0.0.0.0 --port 11434
    ```
+
+### 🤖 Ollama (Optional: If Using Local LLM Inference)_Linux version installation
+
+1. Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+2. Verify the installation of Ollama
+ollama --version
+3. Pull and Run LLaMA 3 Model
+ollama pull llama3
+4. Once the model is downloaded, you can run it with:
+ollama run llama3 input "Hello, how can I use this model for NLP tasks?"
+5. ⚙️ Optional: Add Ollama as a Startup Service
+For convenience, you can set up Ollama to start automatically with your system:
+
+Create a user and group for Ollama:
+sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
+sudo usermod -a -G ollama $(whoami)
+
+Create a systemd service file:
+sudo nano /etc/systemd/system/ollama.service
+Add the following content:
+
+ini
+
+[Unit]
+Description=Ollama Service
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+Reload systemd and enable the service:
+
+sudo systemctl daemon-reload
+sudo systemctl enable ollama
+sudo systemctl start ollama
+This will start Ollama as a background service.
 
 ---
 
