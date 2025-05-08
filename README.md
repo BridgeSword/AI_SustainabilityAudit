@@ -71,14 +71,22 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
 ### 🤖 Ollama (Optional: If Using Local LLM Inference)_Linux version installation
 
 1. Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
+   
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+    ```
 2. Verify the installation of Ollama
-ollama --version
+
+   ```bash
+   ollama --version
+    ```
 3. Pull and Run LLaMA 3 Model
-ollama pull llama3
-4. Once the model is downloaded, you can run it with:
+   ```bash
+   ollama pull llama3
+    ```
+6. Once the model is downloaded, you can run it with:
 ollama run llama3 input "Hello, how can I use this model for NLP tasks?"
-5. ⚙️ Optional: Add Ollama as a Startup Service
+7. ⚙️ Optional: Add Ollama as a Startup Service
       For convenience, you can set up Ollama to start automatically with your system:
       
       Create a user and group for Ollama:
