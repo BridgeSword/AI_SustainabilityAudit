@@ -19,7 +19,6 @@ from ..agents.prompts import *
 
 from ..main import get_mongo_client, milvus_client
 
-
 logger = get_logger(__name__)
 
 router = APIRouter()
@@ -30,8 +29,8 @@ router = APIRouter()
     tags=["PDF Edit Requests"],
     description="Use this API to save the Manual Edits by the user to the database")
 async def manual_edits(
-    manual_edit_request: ManualEditsRequest,
-    db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+        manual_edit_request: ManualEditsRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
     section_collection = db.get_collection("sections")
 
@@ -40,26 +39,26 @@ async def manual_edits(
 
     if not section_id or not user_edit:
         return GenericResponse(
-            response = "Section ID and User Edits should not be empty or None", 
-            status = Status.failed.value
+            response="Section ID and User Edits should not be empty or None",
+            status=Status.failed.value
         )
-    
+
     try:
         section_id = ObjectId(section_id)
     except:
         return GenericResponse(
-            response = "Invalid Section Id Format", 
-            status = Status.invalid.value
+            response="Invalid Section Id Format",
+            status=Status.invalid.value
         )
-    
+
     section = await section_collection.find_one(
         {"_id": section_id}
     )
 
     if not section:
         return GenericResponse(
-            response = f"No Section found with ID: {str(section_id)}", 
-            status = Status.invalid.value
+            response=f"No Section found with ID: {str(section_id)}",
+            status=Status.invalid.value
         )
 
     edits = section.get("edits", None)
@@ -75,7 +74,7 @@ async def manual_edits(
 
     section_update = await section_collection.find_one_and_update(
         {"_id": section_id},
-        {"$set": 
+        {"$set":
             {
                 "edits": edits
             }
@@ -83,19 +82,19 @@ async def manual_edits(
     )
 
     return GenericResponse(
-        response = "Successfully Updated!",
-        status = Status.success.value
+        response="Successfully Updated!",
+        status=Status.success.value
     )
 
-import json
+
 @router.post(
     "/ai",
     tags=["PDF Edit Requests"],
     description="Use this API to make AI Edits by the user and save to the Database"
 )
 async def ai_edits(
-    ai_edit_request: AIEditsRequest,
-    db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+        ai_edit_request: AIEditsRequest,
+        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
     report_collection = db.get_collection("reports")
     section_collection = db.get_collection("sections")
@@ -111,13 +110,13 @@ async def ai_edits(
 
     if device is None:
         device = "cpu"
-    
+
     gai_model = genai_model.lower().split("-")
 
     if len(gai_model) < 2:
         return GenericResponse(
-            response = "No GenAI Model specified or the variant is not supported!",
-            status = Status.failed.value
+            response="No GenAI Model specified or the variant is not supported!",
+            status=Status.failed.value
         )
 
     genai_models = GAIModels.mapping().get(gai_model[0], None)
@@ -129,7 +128,7 @@ async def ai_edits(
         )
 
     genai_model_variant = genai_models.get("-".join(gai_model[1:]), None)
-    is_ollama  = genai_model.lower().startswith("ollama")
+
     if not genai_model_variant:
         return GenericResponse(
             response=f"Unknown GenAI model variant: {"-".join(gai_model[1:])}",
@@ -138,37 +137,37 @@ async def ai_edits(
 
     if not section_id or not user_request:
         return GenericResponse(
-            response = "Section ID and User Edits should not be empty or None", 
-            status = Status.failed.value
+            response="Section ID and User Edits should not be empty or None",
+            status=Status.failed.value
         )
-    
+
     try:
         section_id = ObjectId(section_id)
         report_id = ObjectId(report_id)
     except:
         return GenericResponse(
-            response = "Invalid Report Id or Section Id Format", 
-            status = Status.invalid.value
+            response="Invalid Report Id or Section Id Format",
+            status=Status.invalid.value
         )
-    
+
     report = await report_collection.find_one(
         {"_id": report_id}
     )
 
     if not report:
         return GenericResponse(
-            response = f"No Report found with ID: {str(report_id)}", 
-            status = Status.invalid.value
+            response=f"No Report found with ID: {str(report_id)}",
+            status=Status.invalid.value
         )
-    
+
     section = await section_collection.find_one(
         {"_id": section_id}
     )
 
     if not section:
         return GenericResponse(
-            response = f"No Section found with ID: {str(section_id)}", 
-            status = Status.invalid.value
+            response=f"No Section found with ID: {str(section_id)}",
+            status=Status.invalid.value
         )
 
     edits = section.get("edits", {})
@@ -183,17 +182,17 @@ async def ai_edits(
 
     user_instructions = USER_INSTRUCTIONS.format(
         company=report.get("company").upper(),
-        carbon_std=report.get("standard"), 
-        carbon_goal=report.get("goal"), 
-        carbon_plan=report.get("user_plan"), 
+        carbon_std=report.get("standard"),
+        carbon_goal=report.get("goal"),
+        carbon_plan=report.get("user_plan"),
         carbon_action=report.get("action")
     )
-    
+
     embedding_model = "stella_15"
     emb_model = settings.embedders.model_fields[embedding_model].default
 
     embedder = SentenceTransformer(emb_model,
-                                   trust_remote_code=True, 
+                                   trust_remote_code=True,
                                    device=device)
 
     query_embedding = embedder.encode(user_instructions, device=device)
@@ -205,7 +204,7 @@ async def ai_edits(
         anns_field="vector_embs",
         data=[query_embedding],
         limit=3,
-        search_params={"metric_type": "L2"}, 
+        search_params={"metric_type": "L2"},
         output_fields=["text_chunk"]
     )
 
@@ -214,7 +213,7 @@ async def ai_edits(
     relevant_ctx = []
     for hits in results:
         for idx, hit in enumerate(hits):
-            relevant_ctx.append(f"{idx+1}. " + hit["entity"]["text_chunk"])
+            relevant_ctx.append(f"{idx + 1}. " + hit["entity"]["text_chunk"])
 
     if len(relevant_ctx) > 0:
         context = ADDITIONAL_CONTEXT.format(context="\n\n".join(relevant_ctx))
@@ -222,48 +221,28 @@ async def ai_edits(
     edit_instruction = context + "\n\n" + user_instructions + "\n\nPreviously Generated Section Content:\n" + latest_content
     edit_instruction = edit_instruction.strip()
 
-    edit_agent = AgentBase(genai_model=genai_model_variant, 
-                           temperature=0.7, 
-                           device=device, 
+    edit_agent = AgentBase(genai_model=genai_model_variant,
+                           temperature=0.7,
+                           device=device,
                            system_message=SYSTEM_PROMPT_AI_EDIT
-                        )
-    
-    modified_content = None
-    for attempt in range(1, 3):
-            try:
-                if is_ollama:
-        
-                    raw = edit_agent(edit_instruction)
-               
-    
-                    modified_content = raw.strip()
-                    try:
-                        parsed = json.loads(raw)
-                        modified_content = parsed.get("modified_content")
-                    except json.JSONDecodeError:
-                        modified_content = raw.strip()
-                else:
-     
-                    out = edit_agent(edit_instruction, json_out=True)
-                    logger.info("← OpenAI json_out raw (attempt %d): %s", attempt, out)
-                    if isinstance(out, list) and out:
-                        modified_content = out[0].get("modified_content")
+                           )
 
-                if modified_content:
-                    break
-            except json.JSONDecodeError as e:
-             
-                logger.error("Failed to json.loads")
-                edit_agent.clear_history()
-            except Exception as e:
-         
-                logger.exception("AI edit attempt %d failed for model %s", attempt, genai_model)
-                edit_agent.clear_history()
+    modified_content = None
+
+    for _ in range(2):
+        try:
+            agent_out = edit_agent(edit_instruction, json_out=True)[0]
+            modified_content = agent_out["modified_content"]
+            break
+        except:
+            edit_agent.clear_history()
+            logger.info(
+                "------------Some issue in processing Agent output or intialization, trying again...------------")
 
     if not modified_content:
         return GenericResponse(
-            response = "Some issue occured during processing of Agent request...",
-            status = Status.failed.value
+            response="Some issue occured during processing of Agent request...",
+            status=Status.failed.value
         )
 
     edits["latest"] = modified_content
@@ -278,6 +257,6 @@ async def ai_edits(
     )
 
     return AIEditsResponse(
-        section_id = str(section_id),
+        section_id=str(section_id),
         modified_content=modified_content
     )
