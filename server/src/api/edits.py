@@ -19,6 +19,7 @@ from ..agents.prompts import *
 
 from ..main import get_mongo_client, milvus_client
 
+
 logger = get_logger(__name__)
 
 router = APIRouter()
@@ -29,8 +30,8 @@ router = APIRouter()
     tags=["PDF Edit Requests"],
     description="Use this API to save the Manual Edits by the user to the database")
 async def manual_edits(
-        manual_edit_request: ManualEditsRequest,
-        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+    manual_edit_request: ManualEditsRequest,
+    db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
     section_collection = db.get_collection("sections")
 
@@ -39,16 +40,16 @@ async def manual_edits(
 
     if not section_id or not user_edit:
         return GenericResponse(
-            response="Section ID and User Edits should not be empty or None",
-            status=Status.failed.value
+            response = "Section ID and User Edits should not be empty or None",
+            status = Status.failed.value
         )
 
     try:
         section_id = ObjectId(section_id)
     except:
         return GenericResponse(
-            response="Invalid Section Id Format",
-            status=Status.invalid.value
+            response = "Invalid Section Id Format",
+            status = Status.invalid.value
         )
 
     section = await section_collection.find_one(
@@ -57,8 +58,8 @@ async def manual_edits(
 
     if not section:
         return GenericResponse(
-            response=f"No Section found with ID: {str(section_id)}",
-            status=Status.invalid.value
+            response = f"No Section found with ID: {str(section_id)}",
+            status = Status.invalid.value
         )
 
     edits = section.get("edits", None)
@@ -82,8 +83,8 @@ async def manual_edits(
     )
 
     return GenericResponse(
-        response="Successfully Updated!",
-        status=Status.success.value
+        response = "Successfully Updated!",
+        status = Status.success.value
     )
 
 
@@ -93,8 +94,8 @@ async def manual_edits(
     description="Use this API to make AI Edits by the user and save to the Database"
 )
 async def ai_edits(
-        ai_edit_request: AIEditsRequest,
-        db: AsyncIOMotorDatabase = Depends(get_mongo_client)
+    ai_edit_request: AIEditsRequest,
+    db: AsyncIOMotorDatabase = Depends(get_mongo_client)
 ):
     report_collection = db.get_collection("reports")
     section_collection = db.get_collection("sections")
@@ -115,8 +116,8 @@ async def ai_edits(
 
     if len(gai_model) < 2:
         return GenericResponse(
-            response="No GenAI Model specified or the variant is not supported!",
-            status=Status.failed.value
+            response = "No GenAI Model specified or the variant is not supported!",
+            status = Status.failed.value
         )
 
     genai_models = GAIModels.mapping().get(gai_model[0], None)
@@ -137,8 +138,8 @@ async def ai_edits(
 
     if not section_id or not user_request:
         return GenericResponse(
-            response="Section ID and User Edits should not be empty or None",
-            status=Status.failed.value
+            response = "Section ID and User Edits should not be empty or None",
+            status = Status.failed.value
         )
 
     try:
@@ -146,8 +147,8 @@ async def ai_edits(
         report_id = ObjectId(report_id)
     except:
         return GenericResponse(
-            response="Invalid Report Id or Section Id Format",
-            status=Status.invalid.value
+            response = "Invalid Report Id or Section Id Format",
+            status = Status.invalid.value
         )
 
     report = await report_collection.find_one(
@@ -156,8 +157,8 @@ async def ai_edits(
 
     if not report:
         return GenericResponse(
-            response=f"No Report found with ID: {str(report_id)}",
-            status=Status.invalid.value
+            response = f"No Report found with ID: {str(report_id)}",
+            status = Status.invalid.value
         )
 
     section = await section_collection.find_one(
@@ -166,8 +167,8 @@ async def ai_edits(
 
     if not section:
         return GenericResponse(
-            response=f"No Section found with ID: {str(section_id)}",
-            status=Status.invalid.value
+            response = f"No Section found with ID: {str(section_id)}",
+            status = Status.invalid.value
         )
 
     edits = section.get("edits", {})
@@ -213,7 +214,7 @@ async def ai_edits(
     relevant_ctx = []
     for hits in results:
         for idx, hit in enumerate(hits):
-            relevant_ctx.append(f"{idx + 1}. " + hit["entity"]["text_chunk"])
+            relevant_ctx.append(f"{idx+1}. " + hit["entity"]["text_chunk"])
 
     if len(relevant_ctx) > 0:
         context = ADDITIONAL_CONTEXT.format(context="\n\n".join(relevant_ctx))
@@ -225,7 +226,7 @@ async def ai_edits(
                            temperature=0.7,
                            device=device,
                            system_message=SYSTEM_PROMPT_AI_EDIT
-                           )
+                        )
 
     modified_content = None
 
@@ -236,13 +237,12 @@ async def ai_edits(
             break
         except:
             edit_agent.clear_history()
-            logger.info(
-                "------------Some issue in processing Agent output or intialization, trying again...------------")
+            logger.info("------------Some issue in processing Agent output or intialization, trying again...------------")
 
     if not modified_content:
         return GenericResponse(
-            response="Some issue occured during processing of Agent request...",
-            status=Status.failed.value
+            response = "Some issue occured during processing of Agent request...",
+            status = Status.failed.value
         )
 
     edits["latest"] = modified_content
@@ -257,6 +257,6 @@ async def ai_edits(
     )
 
     return AIEditsResponse(
-        section_id=str(section_id),
+        section_id = str(section_id),
         modified_content=modified_content
     )
