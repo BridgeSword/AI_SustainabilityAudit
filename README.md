@@ -79,37 +79,37 @@ ollama pull llama3
 4. Once the model is downloaded, you can run it with:
 ollama run llama3 input "Hello, how can I use this model for NLP tasks?"
 5. ⚙️ Optional: Add Ollama as a Startup Service
-For convenience, you can set up Ollama to start automatically with your system:
-
-Create a user and group for Ollama:
-sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
-sudo usermod -a -G ollama $(whoami)
-
-Create a systemd service file:
-sudo nano /etc/systemd/system/ollama.service
-Add the following content:
-
-ini
-
-[Unit]
-Description=Ollama Service
-After=network-online.target
-
-[Service]
-ExecStart=/usr/bin/ollama serve
-User=ollama
-Group=ollama
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=default.target
-Reload systemd and enable the service:
-
-sudo systemctl daemon-reload
-sudo systemctl enable ollama
-sudo systemctl start ollama
-This will start Ollama as a background service.
+      For convenience, you can set up Ollama to start automatically with your system:
+      
+      Create a user and group for Ollama:
+      sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
+      sudo usermod -a -G ollama $(whoami)
+      
+      Create a systemd service file:
+      sudo nano /etc/systemd/system/ollama.service
+      Add the following content:
+      
+      ini
+      
+      [Unit]
+      Description=Ollama Service
+      After=network-online.target
+      
+      [Service]
+      ExecStart=/usr/bin/ollama serve
+      User=ollama
+      Group=ollama
+      Restart=always
+      RestartSec=3
+      
+      [Install]
+      WantedBy=default.target
+      Reload systemd and enable the service:
+      
+      sudo systemctl daemon-reload
+      sudo systemctl enable ollama
+      sudo systemctl start ollama
+      This will start Ollama as a background service.
 
 ---
 
