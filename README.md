@@ -30,17 +30,13 @@ This repository contains the frontend and backend components for the **MARAG** p
 
 ### 🐳 Docker Services
 
-1. Load environment variables:
-
-   ```bash
-   source .env
-   ```
-
-2. Start all services defined in the Docker Compose file:
+1. Start all services defined in the Docker Compose file:
 
    ```bash
    docker-compose -f docker-compose-sdmarag.yaml up -d
    ```
+   
+   NOTE: `docker-compose-sdmarag` is present in root directory (MARAG)
 
 > **Note**: Ensure Docker and Docker Compose are installed and running on your system.
 
@@ -59,7 +55,7 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
 2. Download the desired model:
 
    ```bash
-   ollama pull llama3
+   ollama pull llama3.2
    ```
 
 3. Start the Ollama server:
@@ -80,13 +76,13 @@ If you are using [Ollama](https://ollama.com/) for local inference with LLaMA mo
    ```bash
    ollama --version
     ```
-3. Pull and Run LLaMA 3 Model
+3. Pull and Run LLaMA 3.2 Model
    ```bash
-   ollama pull llama3
+   ollama pull llama3.2
     ```
 4. Once the model is downloaded, you can run it with:
    ```bash
-   ollama run llama3 input "Hello, how can I use this model for NLP tasks?"
+   ollama run llama3.2 input "Hello, how can I use this model for NLP tasks?"
     ```
    
 5. ⚙️ Optional: Add Ollama as a Startup Service
@@ -152,13 +148,41 @@ Install [Poetry](https://python-poetry.org/docs/#installation):
    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
    source ~/.bashrc
    ```
+   
+Install [Anaconda](https://www.anaconda.com/docs/getting-started/miniconda/install#linux):
+
+1. Install Anaconda:
+   ```bash
+   mkdir -p ~/miniconda3
+   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+   bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+   rm ~/miniconda3/miniconda.sh
+   ```
+2. Activate Anaconda shell:
+   ```bash
+   source ~/miniconda3/bin/activate
+   ```
+3. Initialize conda:
+   ```bash
+   conda init --all
+   ```
+
+Create Virtual Environment:
+
+1. Execute `conda create -n smarag python=3.12`
+2. Execute `conda activate smarag`
+
+Install All Packages using Poetry:
+
+`poetry install`
+
 
 #### Running the Backend
 
 Use Poetry to run the backend startup script:
 
 ```bash
-poetry run bash start.sh
+sh start.sh
 ```
 
 > ⚠️ Warnings during launch can typically be ignored unless they halt execution.
@@ -175,12 +199,28 @@ Once the frontend server is running, open your browser and go to:
 http://localhost:5173/
 ```
 
-### 🥪 Accessing the API
+### 🥪 Accessing the FastAPI Backend
 
 The FastAPI backend will be available at:
 
 ```
 http://localhost:9092/
+```
+
+### 🥪 Accessing VectorDB
+
+The Milvus VectorDB will be available at:
+
+```
+http://localhost:8000/
+```
+
+### 🥪 Accessing Flower
+
+The Celery Flower will be available at:
+
+```
+http://localhost:5555/
 ```
 
 ---
