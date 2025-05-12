@@ -170,7 +170,6 @@ test.py
 
 # Server-related
 server/src/carbon_reports
-server/src/VS_files
 server/src/user_files
 user_files
 
