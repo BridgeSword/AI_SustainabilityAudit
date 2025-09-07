@@ -54,7 +54,7 @@ const RightPanel = ({ formData }) => {
         // company: "Cornell University",
         company: sessionStorage.getItem("company") || "Cornell University",
         device: "cpu",
-        genai_model: "ollama-llama3.2"
+        genai_model: "ollama-llama3"
       })
     );
 
@@ -124,23 +124,14 @@ const RightPanel = ({ formData }) => {
             content: "",
             fullContent: resultStr,
             isThinking: false,
-            showApprove: !isWaitingReport
+            showApprove: true, // Always show approve button for plans
+            isPlan: true // Mark this as a plan that needs approval
           };
 
-          if (isWaitingReport) {
-            setIsWaitingReport(false);
-
-            if (isReportGenerating) {
-              setIsReportGenerating(false);
-            }
-
-            navigate("/test", {
-              state: {
-                waitForSocket: true,
-                loading: false,
-                reportData: resultStr
-              }
-            });
+          // Don't navigate immediately - wait for user approval
+          setIsWaitingReport(false);
+          if (isReportGenerating) {
+            setIsReportGenerating(false);
           }
         }
 
@@ -239,9 +230,22 @@ const RightPanel = ({ formData }) => {
   };
 
   const handleApprove = () => {
+    // Send proceed message to WebSocket
+    if (globalWs && globalWs.readyState === WebSocket.OPEN) {
+      globalWs.send(JSON.stringify({ proceed: true }));
+    }
+    
+    // Update chat history to show approval
+    setChatHistory((prev) => [
+      ...prev,
+      { role: "user", content: "✅ Plan approved! Generating report..." }
+    ]);
+    
+    // Navigate to test page to wait for report generation
     navigate("/test", {
       state: {
-        proceed: true
+        proceed: true,
+        loading: true
       }
     });
   };

@@ -1,6 +1,6 @@
 from typing import Dict, Union, List
 
-from ...main import celery_app
+from ...core.dependencies import celery_app
 from ...core.utils import get_logger
 from ...agents import AgentBase
 from ...agents.prompts import *

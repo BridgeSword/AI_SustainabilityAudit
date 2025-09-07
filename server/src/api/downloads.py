@@ -12,7 +12,7 @@ from ..core.config import settings
 from ..core.schemas import DownloadsRequest
 from ..core.utils import get_logger
 
-from ..main import get_mongo_client
+from ..core.dependencies import get_mongo_client
 
 logger = get_logger(__name__)
 

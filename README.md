@@ -2,242 +2,343 @@
 
 This repository contains the frontend and backend components for the **MARAG** project. The application includes a React-based frontend, a FastAPI-based backend, and supporting services managed via Docker.
 
+## 🎯 Quick Start Guide
+
+Choose your setup mode:
+
+- **[🆕 First Time Setup](#-first-time-setup)** - For new users setting up the project for the first time
+- **[🔄 Returning User Setup](#-returning-user-setup)** - For users who have already set up the project and need to restart it
+
 ---
 
-## 🛠️ Build and Run Instructions
+## 🆕 First Time Setup
 
-### 📦 Frontend
+### Prerequisites
 
-1. Navigate to the frontend directory:
+Before starting, ensure you have the following installed:
+- **Docker & Docker Compose** - For database and vector services
+- **Node.js (v16+)** - For the frontend
+- **Python 3.12** - For the backend
+- **Poetry** - For Python dependency management
+- **Ollama** - For local LLM inference (optional but recommended)
 
+### Step 1: Clone and Setup Environment
+
+1. **Clone the repository** (if not already done):
    ```bash
-   cd client
+   git clone <repository-url>
+   cd MARAG
    ```
 
-2. Install dependencies:
-
+2. **Create Python virtual environment**:
    ```bash
+   conda create -n smarag python=3.12
+   conda activate smarag
+   ```
+
+3. **Install Python dependencies**:
+   ```bash
+   poetry install
+   ```
+
+### Step 2: Start Docker Services
+
+1. **Start all required services**:
+   ```bash
+   docker-compose -f docker-compose-sdmarag.yaml up -d
+   ```
+
+   This will start:
+   - MongoDB (port 27017)
+   - Milvus Vector Database (port 19530)
+   - Milvus Attu UI (port 8000)
+   - Redis (port 6379)
+   - MinIO (port 9000-9001)
+   - etcd (port 2379)
+
+### Step 3: Setup Ollama (Recommended)
+
+1. **Install Ollama**:
+   ```bash
+   # macOS
+   brew install Ollama/tap/ollama
+   
+   # Linux
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. **Download and start the model**:
+   ```bash
+   ollama pull llama3:latest
+   ollama serve --host 0.0.0.0 --port 11434
+   ```
+
+### Step 4: Start Backend Services
+
+1. **Start the FastAPI backend**:
+   ```bash
+   export APP_ENV=local
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+   poetry run uvicorn server.src.main:app --host 0.0.0.0 --port 9092 --workers 1 --timeout-keep-alive 1000000
+   ```
+
+2. **In a new terminal, start Celery workers**:
+   ```bash
+   export APP_ENV=local
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+   poetry run celery -A server.src.main.celery_app worker -l info --pool=threads
+   ```
+
+### Step 5: Start Frontend
+
+1. **Install frontend dependencies**:
+   ```bash
+   cd client
    npm install
    ```
 
-3. Start the development server:
-
+2. **Start the development server**:
    ```bash
    npm run dev
    ```
 
+### Step 6: Access the Application
+
+- **Frontend**: http://localhost:5173/
+- **Backend API**: http://localhost:9092/
+- **Milvus UI**: http://localhost:8000/
+- **Celery Flower**: http://localhost:5555/
+
 ---
 
-### 🐳 Docker Services
+## 🔄 Returning User Setup
 
-1. Start all services defined in the Docker Compose file:
+If you've already set up the project and just need to restart it:
 
+### Quick Restart (All Services)
+
+1. **Start Docker services**:
    ```bash
    docker-compose -f docker-compose-sdmarag.yaml up -d
    ```
-   
-   NOTE: `docker-compose-sdmarag` is present in root directory (MARAG)
 
-> **Note**: Ensure Docker and Docker Compose are installed and running on your system.
-
----
-
-### 🤖 Ollama (Optional: If Using Local LLM Inference)_MAC version installation
-
-If you are using [Ollama](https://ollama.com/) for local inference with LLaMA models:
-
-1. Install Ollama:
-
-   ```bash
-   brew install Ollama/tap/ollama
-   ```
-
-2. Download the desired model:
-
-   ```bash
-   ollama pull llama3.2
-   ```
-
-3. Start the Ollama server:
-
+2. **Start Ollama** (if using local LLM):
    ```bash
    ollama serve --host 0.0.0.0 --port 11434
    ```
 
-### 🤖 Ollama (Optional: If Using Local LLM Inference)_Linux version installation
-
-1. Install Ollama
-   
+3. **Start backend** (Terminal 1):
    ```bash
-   curl -fsSL https://ollama.com/install.sh | sh
-    ```
-2. Verify the installation of Ollama
-
-   ```bash
-   ollama --version
-    ```
-3. Pull and Run LLaMA 3.2 Model
-   ```bash
-   ollama pull llama3.2
-    ```
-4. Once the model is downloaded, you can run it with:
-   ```bash
-   ollama run llama3.2 input "Hello, how can I use this model for NLP tasks?"
-    ```
-   
-5. ⚙️ Optional: Add Ollama as a Startup Service
-      For convenience, you can set up Ollama to start automatically with your system:
-   
- 
-      Create a user and group for Ollama:
-
-    ```bash           
-      sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
-      sudo usermod -a -G ollama $(whoami)
-    ```  
-      Create a systemd service file:
-   
-     ```bash    
-      sudo nano /etc/systemd/system/ollama.service
-     ```     
-      Add the following content:
-     ```bash          
-      [Unit]
-      Description=Ollama Service
-      After=network-online.target
-      
-      [Service]
-      ExecStart=/usr/bin/ollama serve
-      User=ollama
-      Group=ollama
-      Restart=always
-      RestartSec=3
-      
-      [Install]
-      WantedBy=default.target
-
-      
-      [Install]
-      WantedBy=default.target
-     ```  
-      Reload systemd and enable the service:
-     ```bash        
-      sudo systemctl daemon-reload
-      sudo systemctl enable ollama
-      sudo systemctl start ollama
-
-     ```
-   This will start Ollama as a background service. 
----
-
-### 🧬 Backend
-
-#### One-Time Setup (First Use)
-
-Install [Poetry](https://python-poetry.org/docs/#installation):
-
-1. Install Poetry:
-
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   conda activate smarag
+   export APP_ENV=local
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+   poetry run uvicorn server.src.main:app --host 0.0.0.0 --port 9092 --workers 1 --timeout-keep-alive 1000000
    ```
 
-2. Add Poetry to your shell’s PATH:
-
+4. **Start Celery workers** (Terminal 2):
    ```bash
-   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-   source ~/.bashrc
-   ```
-   
-Install [Anaconda](https://www.anaconda.com/docs/getting-started/miniconda/install#linux):
-
-1. Install Anaconda:
-   ```bash
-   mkdir -p ~/miniconda3
-   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
-   bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-   rm ~/miniconda3/miniconda.sh
-   ```
-2. Activate Anaconda shell:
-   ```bash
-   source ~/miniconda3/bin/activate
-   ```
-3. Initialize conda:
-   ```bash
-   conda init --all
+   conda activate smarag
+   export APP_ENV=local
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+   poetry run celery -A server.src.main.celery_app worker -l info --pool=threads
    ```
 
-Create Virtual Environment:
+5. **Start frontend** (Terminal 3):
+   ```bash
+   cd client
+   npm run dev
+   ```
 
-1. Execute `conda create -n smarag python=3.12`
-2. Execute `conda activate smarag`
+### Using the Start Script (Alternative)
 
-Install All Packages using Poetry:
-
-`poetry install`
-
-
-#### Running the Backend
-
-Use Poetry to run the backend startup script:
-
+You can also use the provided start script:
 ```bash
+conda activate smarag
 sh start.sh
 ```
 
-> ⚠️ Warnings during launch can typically be ignored unless they halt execution.
+---
+
+## 🚀 How to Use the Application
+
+### Carbon Report Generation Workflow
+
+1. **Register/Login**: Create an account or login to the system
+2. **Fill Form**: Enter your carbon report details:
+   - Report Name
+   - Carbon Standard (e.g., GHG)
+   - Carbon Goal
+   - Carbon Plan
+   - Carbon Action
+3. **Generate Plan**: Click Submit to generate an AI-powered plan
+4. **Review & Approve**: Review the generated plan and approve it
+5. **Generate Report**: The system will generate the full carbon report
+6. **Edit & Download**: Edit sections as needed and download the final report
+
+### Key Features
+
+- **AI-Powered Planning**: Uses Ollama with LLaMA3 for intelligent plan generation
+- **Multi-Agent System**: Different AI agents handle different aspects of report generation
+- **Real-time Updates**: WebSocket-based real-time communication
+- **Interactive Editing**: Edit generated content with AI assistance
+- **PDF Export**: Download reports in PDF format
 
 ---
 
-## 🚀 Usage
+## 🛠️ Detailed Setup Instructions
 
-### 🌐 Accessing the UI
+### Prerequisites Installation
 
-Once the frontend server is running, open your browser and go to:
+#### Docker & Docker Compose
+- **macOS**: Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- **Linux**: 
+  ```bash
+  sudo apt-get update
+  sudo apt-get install docker.io docker-compose
+  sudo usermod -aG docker $USER
+  ```
 
+#### Node.js
+- **macOS**: `brew install node`
+- **Linux**: 
+  ```bash
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+  ```
+
+#### Python & Poetry
+- **Install Poetry**:
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+  source ~/.bashrc
+  ```
+
+- **Install Anaconda**:
+  ```bash
+  # macOS
+  brew install --cask anaconda
+  
+  # Linux
+  mkdir -p ~/miniconda3
+  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+  bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+  rm ~/miniconda3/miniconda.sh
+  source ~/miniconda3/bin/activate
+  conda init --all
+  ```
+
+#### Ollama Setup
+
+**macOS Installation**:
+```bash
+brew install Ollama/tap/ollama
+ollama pull llama3:latest
+ollama serve --host 0.0.0.0 --port 11434
 ```
-http://localhost:5173/
+
+**Linux Installation**:
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3:latest
+ollama serve --host 0.0.0.0 --port 11434
 ```
 
-### 🥪 Accessing the FastAPI Backend
+**Optional: Auto-start Ollama Service (Linux)**:
+```bash
+sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
+sudo usermod -a -G ollama $(whoami)
 
-The FastAPI backend will be available at:
-
-```
-http://localhost:9092/
-```
-
-### 🥪 Accessing VectorDB
-
-The Milvus VectorDB will be available at:
-
-```
-http://localhost:8000/
+sudo nano /etc/systemd/system/ollama.service
 ```
 
-### 🥪 Accessing Flower
+Add this content:
+```ini
+[Unit]
+Description=Ollama Service
+After=network-online.target
 
-The Celery Flower will be available at:
+[Service]
+ExecStart=/usr/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
 
+[Install]
+WantedBy=default.target
 ```
-http://localhost:5555/
+
+Then:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable ollama
+sudo systemctl start ollama
 ```
 
 ---
 
-## 📊 Monitoring MongoDB
+## 🌐 Service URLs
 
-To inspect the MongoDB instance used by the backend:
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:5173/ | React application UI |
+| **Backend API** | http://localhost:9092/ | FastAPI backend with Swagger docs |
+| **Milvus UI** | http://localhost:8000/ | Vector database management |
+| **Celery Flower** | http://localhost:5555/ | Task queue monitoring |
+| **MongoDB** | mongodb://localhost:27017 | Database connection |
 
-1. Download and install [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
-2. Launch the application and connect using the following URI:
+---
 
-   ```
-   mongodb://localhost:27017
-   ```
-3. Go to **Advanced Connection Options > Authentication**
+## 📊 Monitoring & Debugging
 
-   * **Username**: `admin`
-   * **Password**: `admin`
+### MongoDB Monitoring
+1. Install [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
+2. Connect using: `mongodb://localhost:27017`
+3. No authentication required (development setup)
 
-> These credentials correspond to `MONGO_ROOT_USER` and `MONGO_ROOT_PASS` in your `.env` file.
+### Service Status Check
+```bash
+# Check Docker services
+docker ps
+
+# Check if ports are in use
+lsof -i :5173  # Frontend
+lsof -i :9092  # Backend
+lsof -i :11434 # Ollama
+lsof -i :27017 # MongoDB
+lsof -i :19530 # Milvus
+```
+
+### Common Issues & Solutions
+
+1. **Port already in use**: Kill processes using the ports
+2. **Docker services not starting**: Check Docker daemon is running
+3. **Ollama model not found**: Run `ollama pull llama3:latest`
+4. **Backend connection issues**: Ensure all environment variables are set
+
+---
+
+## 🔧 Development
+
+### Project Structure
+```
+MARAG/
+├── client/                 # React frontend
+├── server/                 # FastAPI backend
+│   ├── src/
+│   │   ├── api/           # API endpoints
+│   │   ├── core/          # Core configuration
+│   │   ├── services/      # Business logic
+│   │   └── db/            # Database models
+├── docker-compose-sdmarag.yaml  # Docker services
+└── start.sh               # Startup script
+```
+
+### Environment Variables
+The application uses these key environment variables:
+- `APP_ENV=local`
+- `MILVUS_URI=http://localhost:19530`
+- `MONGO_HOST=localhost`
+- `MONGO_PORT=27017`
+- `CELERY_BROKER=redis://localhost:6379/0`

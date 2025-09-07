@@ -279,7 +279,7 @@ const TestPage = () => {
       report_id:    reportId,                       
       section_id:   sections[selectedSection].id, 
       user_request: chatInput,
-      genai_model:  "ollama-llama3.2",         
+      genai_model:  "ollama-llama3",         
       device:       "cpu"
     };
 

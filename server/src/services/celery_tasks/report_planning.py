@@ -5,7 +5,7 @@ import torch
 
 from sentence_transformers import SentenceTransformer
 
-from ...main import celery_app, milvus_client
+from ...core.dependencies import celery_app, milvus_client
 from ...core.utils import get_logger
 from ...core.config import settings, GAIEmbeddersCollections
 from ...agents import AgentBase

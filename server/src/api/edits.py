@@ -17,7 +17,7 @@ from ..core.config import GAIModels, settings, GAIEmbeddersCollections
 from ..agents import AgentBase
 from ..agents.prompts import *
 
-from ..main import get_mongo_client, milvus_client
+from ..core.dependencies import get_mongo_client, milvus_client
 
 
 logger = get_logger(__name__)

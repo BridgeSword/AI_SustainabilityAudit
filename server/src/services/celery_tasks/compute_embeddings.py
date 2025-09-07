@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 
 from nltk import sent_tokenize
 
-from ...main import celery_app, milvus_client
+from ...core.dependencies import celery_app, milvus_client
 from ...core.utils import get_logger, clear_torch_cache
 from ...core.config import settings, GAIEmbeddersCollections, settings
 

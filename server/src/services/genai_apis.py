@@ -22,7 +22,12 @@ def call_genaiapi(SYSTEM_PROMPT: str,
 
         logger.info("######### " + genai_model + " #########")
         if "gemini" not in genai_model:
-            genai_model = "-".join(genai_model.split("-")[1:])
+            model_name = "-".join(genai_model.split("-")[1:])
+            # Map model names to available Ollama models
+            if model_name == "llama3":
+                genai_model = "llama3:latest"
+            else:
+                genai_model = model_name
         else:
             time.sleep(4)
 

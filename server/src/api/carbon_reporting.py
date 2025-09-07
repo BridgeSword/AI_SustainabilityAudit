@@ -20,7 +20,7 @@ from ..ws.manager import WSConnectionManager
 
 from ..agents.prompts import USER_INSTRUCTIONS
 
-from ..main import get_mongo_client
+from ..core.dependencies import get_mongo_client
 
 from ..db.mongo.report import ReportModel
 from ..db.mongo.section import SectionModel
@@ -232,7 +232,7 @@ async def plan_report_ws(
                     continue
                 else:
                     user_modification_request = user_accepted["user_comment"]
-                    current_status == WebsocketStatus.plan.value
+                    current_status = WebsocketStatus.plan.value
                 
             elif current_status == WebsocketStatus.generate.value:
                 report_gen_task = start_generating.apply_async(
@@ -319,6 +319,7 @@ async def plan_report_ws(
             await ws_manager.disconnect_and_close(websocket)
 
     except WebSocketDisconnect:
-        await ws_manager.broadcast("Some issue occured!")
-        await ws_manager.disconnect_and_close(websocket)
+        logger.info("WebSocket disconnected")
+        if websocket in ws_manager.active_connections:
+            ws_manager.active_connections.remove(websocket)
 

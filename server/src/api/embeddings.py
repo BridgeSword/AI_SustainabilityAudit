@@ -16,7 +16,7 @@ from ..core.schemas import ComputeDocumentEmbeddingsRequest, GetEmbeddingRequest
 
 from ..services.celery_tasks.compute_embeddings import start_computing
 
-from ..main import milvus_client
+from ..core.dependencies import milvus_client
 
 
 logger = get_logger(__name__)

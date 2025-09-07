@@ -159,6 +159,7 @@ class GAIModels(Enum):
     }
 
     ollama: Dict[str, str] = {
+        "llama3": "ollama-llama3",
         "llama3.2": "ollama-llama3.2"
     }
     

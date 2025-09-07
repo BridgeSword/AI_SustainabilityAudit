@@ -5,17 +5,12 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from pymilvus import MilvusClient
-
-from motor import motor_asyncio
-
-from celery import Celery
-
 from dotenv import load_dotenv
 
 from .core.config import settings
 from .core.utils import get_logger
 from .core.event_handlers import start_app_handler
+from .core.dependencies import milvus_client, celery_app, get_mongo_client
 
 from .exceptions.global_exception_handler import catch_global_exceptions, validation_exception_handler
 
@@ -30,28 +25,6 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 logger = get_logger(__name__)
-
-# ——— Milvus setup ———
-milvus_client = MilvusClient(
-    uri=os.getenv("MILVUS_URI"),
-    token=os.getenv("MILVUS_TOKEN"),
-)
-
-# ——— MongoDB setup ———
-MONGO_URL = f"mongodb://{os.getenv('MONGO_ROOT_USER')}:{os.getenv('MONGO_ROOT_PASS')}@{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_CORE_DB')}?retryWrites=true&w=majority"
-
-mongo_client = motor_asyncio.AsyncIOMotorClient(MONGO_URL)
-core_db = mongo_client.get_database(os.getenv('MONGO_CORE_DB'))
-
-def get_mongo_client():
-     return core_db
-
-# ——— Celery setup ———
-celery_app = Celery("smarag-celery",
-                    broker=os.getenv("CELERY_BROKER"),
-                    backend=os.getenv("CELERY_BACKEND"),
-                    broker_connection_retry_on_startup=True
-                    )
 
 
 from .api import checks, carbon_reporting, embeddings, edits, login, downloads
@@ -80,7 +53,12 @@ app.include_router(edits.router, prefix="/edits/v1")
 app.include_router(login.router)
 app.include_router(downloads.router, prefix="/downloads/v1")
 
-app.add_event_handler("startup", start_app_handler(app, milvus_client))
+# Make Milvus optional for basic functionality
+try:
+    app.add_event_handler("startup", start_app_handler(app, milvus_client))
+except Exception as e:
+    logger.warning(f"Failed to add Milvus startup handler: {e}")
+    logger.info("Starting without Milvus integration...")
 
 app.exception_handler(validation_exception_handler)
 

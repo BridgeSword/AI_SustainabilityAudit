@@ -6,7 +6,7 @@ from ..core.utils import get_logger
 from ..core.schemas import UserLoginRequest, UserSignUpRequest, UserChangePwdRequest, UserDeleteAccountRequest, \
     GenericResponse
 from ..core.schemas import UserOperationResponse
-from ..main import get_mongo_client
+from ..core.dependencies import get_mongo_client
 from typing import Union
 
 from ..db.mongo.user import UserModel
