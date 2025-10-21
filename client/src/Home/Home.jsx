@@ -17,6 +17,7 @@ const Home = () => {
       <div className="main-content">
         <div className="left-panel">
           <button className="text-button">+ New Report</button>
+          <button className="text-button" onClick={() => navigate("/sector-ranking")}>Sector Ranking</button>
           <div className="history">
             <h3 className="history-title">History</h3>
             {historyData != null && historyData.length > 0 ? (

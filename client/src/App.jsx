@@ -5,6 +5,7 @@ import TestPage from "./Test/TestPage.jsx";
 import Login from "./Login/Login.jsx";
 import Register from "./Login/Register.jsx";
 import HistoryReport from "./HistoryReport/HistoryReport.jsx";
+import SectorRanking from "./Pages/SectorRanking.jsx";
 import "./App.css";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/reg" element={<Register />} />
           <Route path="/history-report" element={<HistoryReport />} /*0503*/ />
+          <Route path="/sector-ranking" element={<SectorRanking />} />
         </Routes>
       </Router>
     </WebSocketProvider>

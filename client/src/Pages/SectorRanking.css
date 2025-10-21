@@ -1,0 +1,109 @@
+/* 让页面容器与根节点有高度可撑开 */
+html, body, #root { height: 100%; }
+
+/* SR 专用的布局类，不会影响 Home */
+.sr-container {
+  min-height: 100vh;            /* 整页高度 */
+  display: flex;
+  flex-direction: column;
+}
+.sr-main {
+  flex: 1;
+  display: flex;                 /* 三栏布局 */
+  overflow: hidden;              /* 避免双滚动条 */
+}
+.sr-right {
+  display: flex;
+  flex-direction: column;
+  /* 你也可以固定宽度，或继续用 Home.css 的宽度 */
+  /* width: 28vw; min-width: 320px; */
+  height: 100%;                  /* 关键：右栏本身要有高度 */
+}
+
+/* 复用 RightPanel.css 的类名，但在 SR 作用域里把高度撑满 */
+.sr-right .chat-box-job {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.sr-right .chat-history-job2 {
+  flex: 1;                       /* 聊天历史区撑满剩余空间 */
+  overflow: auto;
+}
+
+.sr-toolbar {
+  position: sticky;
+  top: 0;                       /* 粘在容器顶部 */
+  z-index: 2;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03);
+}
+
+.sr-toolbar-left,
+.sr-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 按钮风格（与 Home 的气质一致） */
+.btn-primary {
+  background: #128C7E;
+  color: #fff;
+  border: 1px solid #0f7a6e;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.btn {
+  background: #f6f8fa;
+  border: 1px solid #e3e7ea;
+  color: #222;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px dashed #cfd8dc;
+  color: #546e7a;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+.btn-link {
+  background: transparent;
+  border: none;
+  color: #888;
+  text-decoration: underline;
+  padding: 6px 8px;
+}
+.btn-primary[disabled],
+.btn[disabled],
+.btn-ghost[disabled],
+.btn-link[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 计数标签 */
+.chip {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.chip-muted {
+  background: #f5f5f5;
+  color: #555;
+  border-color: #eee;
+}
