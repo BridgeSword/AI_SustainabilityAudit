@@ -6,6 +6,7 @@ import Login from "./Login/Login.jsx";
 import Register from "./Login/Register.jsx";
 import HistoryReport from "./HistoryReport/HistoryReport.jsx";
 import SectorRanking from "./Pages/SectorRanking.jsx";
+import InnovativeDetect from "./Pages/InnovativeActionDetect/InnovativeDetect.jsx"; // ← 新增
 import "./App.css";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
@@ -15,11 +16,13 @@ function App() {
     const stored = sessionStorage.getItem("history");
     return stored ? JSON.parse(stored) : null;
   });
+
   useEffect(() => {
     if (historyData) {
       sessionStorage.setItem("history", JSON.stringify(historyData));
     }
-  }, [historyData]);  
+  }, [historyData]);
+
   return (
     <WebSocketProvider>
       <Router>
@@ -28,8 +31,9 @@ function App() {
           <Route path="/test" element={<TestPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reg" element={<Register />} />
-          <Route path="/history-report" element={<HistoryReport />} /*0503*/ />
+          <Route path="/history-report" element={<HistoryReport />} />
           <Route path="/sector-ranking" element={<SectorRanking />} />
+          <Route path="/innovative-detect" element={<InnovativeDetect />} />
         </Routes>
       </Router>
     </WebSocketProvider>

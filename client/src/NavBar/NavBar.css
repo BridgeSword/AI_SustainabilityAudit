@@ -8,22 +8,30 @@
   background-color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; /* 左中右三块 */
   padding: 5px 20px;
   box-shadow: 0 4px 2px -2px rgb(228, 228, 228);
   z-index: 1000;
 }
 
-
+/* —— 左侧：Logo —— */
+.logo-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
 .logo {
   display: flex;
   align-items: center;
   overflow: hidden;
   height: 100%;
-  padding: 0px 24px !important;
+  padding: 0 8px;
   margin: 0;
 }
-
 .logo-img {
   width: 40px;
   height: 40px;
@@ -31,7 +39,6 @@
   object-position: center;
   pointer-events: none;
 }
-
 .logo:hover, .logo-img:hover {
   filter: none !important;
   opacity: 1 !important;
@@ -39,40 +46,55 @@
   box-shadow: none !important;
 }
 
-.login-button {
-  position: absolute;
-  right: 5vw;
-  top: 50%;
-  transform: translateY(-50%);
+/* —— 中间：导航链接 —— */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: #222;
+  text-decoration: none;
+  border: 1px solid transparent;
+  font-size: 14px;
+}
+.nav-link:hover {
+  background: #f6f8fa;
+  border-color: #e3e7ea;
+}
+.nav-link.active {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-color: #c8e6c9;
+}
+
+/* —— 右侧：登录/欢迎/登出 —— */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 统一按钮风格（去掉原来的绝对定位） */
+.login-button,
+.logout-button {
   background-color: #128c7e;
   color: #ffffff;
   border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
 }
-
-.login-button:hover {
-  background-color: #2ead9e;
-}
-
-.logout-button{
-  right: 5vw;
-  background-color: #128c7e;
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
+.login-button:hover,
 .logout-button:hover {
   background-color: #2ead9e;
 }
 
-.welcome-message{
-  margin-right: 2vw;
+.welcome-message {
   font-weight: 500;
+  color: #333;
 }
